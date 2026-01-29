@@ -2,9 +2,11 @@ import Logo from '../../imgs/logo.png'
 import Google from '../../assets/google.png'
 import Gmail from '../../assets/Gmail Logo.png'
 import { useState } from 'react'
-import { registerUser } from '../../services/authService';
+import { LoginUser, registerUser } from '../../services/authService';
+import { useNavigate } from 'react-router-dom';
 
 export default function Register() {
+    const navigate = useNavigate()
 
     const [form, setForm] = useState({
         nome: '',
@@ -16,8 +18,15 @@ export default function Register() {
         try {
             await registerUser(form);
             setForm({ nome: '', email: '', senha: '' });
-
             console.log('Usuário registrado com sucesso');
+            
+            const loginRes = await LoginUser({
+                email: form.email,
+                senha: form.senha
+            })
+
+            localStorage.setItem('token', loginRes.token)
+            navigate('/dashboard')
 
         } catch (error) {
             console.error('Erro ao registrar:', error);

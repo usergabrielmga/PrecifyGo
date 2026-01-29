@@ -4,3 +4,11 @@ export interface User {
   senha: string;
 }
 
+export type LoginResponse = {
+  token: string
+}
+
+
+export type RegisterResponse = {
+  message: string
+}

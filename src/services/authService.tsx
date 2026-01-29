@@ -1,37 +1,42 @@
-import { type User } from '../types/user';
+import { type LoginResponse, type RegisterResponse, type User } from '../types/user';
 
-export const registerUser = async (userData: Omit<User, 'id'>): Promise<User> => {
+export const registerUser = async (
+  userData: Omit<User, 'id'>
+): Promise<RegisterResponse> => {
   const response = await fetch('http://localhost:3000/auth/register', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(userData),
-  });
+  })
 
   if (!response.ok) {
-    throw new Error('Failed to register user');
+    throw new Error('Erro ao registrar usuário')
   }
 
-  return response.json();
-};
+  return response.json() 
+}
 
 
-export const LoginUser = async (userData: Omit<User, 'id'>): Promise<User> => {
+export const LoginUser = async (
+  userData: { email: string; senha: string }
+): Promise<LoginResponse> => {
   const response = await fetch('http://localhost:3000/auth/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(userData),
-  });
+  })
 
   if (!response.ok) {
-    throw new Error('Failed to register user');
+    throw new Error('Erro no login')
   }
 
-  return response.json();
-};
+  return response.json() 
+}
+
 
 
 export const loginGoogle = async (accessToken: string) => {

@@ -1,16 +1,15 @@
 import { GoogleOAuthProvider } from '@react-oauth/google'
-import Login from './views/pages/login'
-import Register from './views/pages/Register'
+import { BrowserRouter } from 'react-router-dom'
+import AppRoutes from './routes/appRoutes'
 
 function App() {
-
-
   return (
-    
-  <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-    <Login />
-  </GoogleOAuthProvider>
-    )
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </GoogleOAuthProvider>
+  )
 }
 
 export default App

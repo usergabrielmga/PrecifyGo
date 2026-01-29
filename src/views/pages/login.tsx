@@ -5,9 +5,11 @@ import { useState } from 'react'
 import { LoginUser } from '../../services/authService';
 import { useGoogleLogin } from '@react-oauth/google';
 import { loginGoogle } from '../../services/authService';
+import { useNavigate } from 'react-router-dom';
 
 
 export default function Register() {
+    const navigate = useNavigate()
 
     const [form, setForm] = useState({
         email: '',
@@ -15,11 +17,15 @@ export default function Register() {
     });
 
     const handleRegister = async () => {
-        try {
-            await LoginUser(form);
-            setForm({email: '', senha: '' });
 
+        try {
+            const res = await LoginUser(form);
+            setForm({email: '', senha: '' });
+            localStorage.setItem('token', res.token);
+
+            
             console.log('Usuário logado com sucesso');
+            navigate('/dashboard');
 
         } catch (error) {
             console.error('Erro ao registrar:', error);
@@ -30,8 +36,12 @@ export default function Register() {
     const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
         const res = await loginGoogle(tokenResponse.access_token);
+
         console.log(res);
         console.log('TOKEN GOOGLE:', tokenResponse);
+
+        localStorage.setItem('token', res.token) 
+    
     },
     onError: () => {
         console.error('Erro ao logar com Google');
@@ -46,7 +56,7 @@ export default function Register() {
             <div className='w-30 h-30 rounded-full bg-[#ffff] '>
                 <img src={Logo} alt="" />
             </div>
-            <form action="" className='flex flex-col items-center mb-5'>
+            <form className='flex flex-col items-center mb-5'>
                 <input type="email" placeholder="Email" className="mt-4 p-2 rounded-lg w-80 bg-[#ffff] border-0 outline-none" value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} />
                 <input type="password" placeholder="Senha" className="mt-4 p-2 rounded-lg w-80 bg-[#ffff] border-0 outline-none" value={form.senha} onChange={(e) => setForm({...form, senha: e.target.value})} />
             </form>
@@ -55,7 +65,7 @@ export default function Register() {
                 <img src={Gmail} alt="" className='w-10 h-10 cursor-pointer' />
             </div>
             <p className='text-white mb-5 text-sm cursor-pointer'>Não tem sua conta! crie sua conta agora</p>
-            <button className="mt-2 p-2 rounded-lg w-80 bg-[#474646] text-[#ffffff] font-bold hover:bg-[#f0f0f0] cursor-pointer" onClick={() => handleRegister()}>Registrar</button>
+            <button type="button" className="mt-2 p-2 rounded-lg w-80 bg-[#474646] text-[#ffffff] font-bold hover:bg-[#f0f0f0] cursor-pointer" onClick={() => handleRegister()}>Registrar</button>
         </div>
     )
 }
