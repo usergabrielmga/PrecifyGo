@@ -3,6 +3,7 @@ import Register from '../views/pages/Register'
 import Dashboard from '../views/pages/dashboard'
 import PrivateRoute from './PrivateRoute'
 import Login from '../views/pages/login'
+import Orcamento from '../views/pages/orcamento'
 
 export default function AppRoutes() {
   return (
@@ -17,6 +18,15 @@ export default function AppRoutes() {
         element={
           <PrivateRoute>
             <Dashboard />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/orcamento"
+        element={
+          <PrivateRoute>
+            <Orcamento />
           </PrivateRoute>
         }
       />

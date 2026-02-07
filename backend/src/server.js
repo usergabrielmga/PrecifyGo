@@ -7,4 +7,6 @@ app.listen({ port: 3000 }, (err, address) => {
   }
 
   console.log(`🚀 Server rodando em ${address}`)
+
+
 })

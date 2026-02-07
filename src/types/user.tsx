@@ -10,5 +10,6 @@ export type LoginResponse = {
 
 
 export type RegisterResponse = {
+  token(arg0: string, token: any): unknown;
   message: string
 }

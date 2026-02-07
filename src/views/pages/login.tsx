@@ -41,6 +41,7 @@ export default function Register() {
         console.log('TOKEN GOOGLE:', tokenResponse);
 
         localStorage.setItem('token', res.token) 
+        navigate('/dashboard');
     
     },
     onError: () => {

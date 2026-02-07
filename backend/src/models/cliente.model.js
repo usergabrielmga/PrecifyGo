@@ -1,7 +1,7 @@
 class ClienteModel {
   static async create(data, conn) {
     const { nome, email, telefone, endereco, cpf_cnpj } = data
-
+    console.log("Payload para o banco:", data, conn);
     const [result] = await conn.execute(
       `
       INSERT INTO Cliente (nome, email, telefone, endereco, cpf_cnpj)
