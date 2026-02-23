@@ -6,6 +6,8 @@ const EmissorModel = require('../models/emissor.model')
 const fs = require('fs')
 const path = require('path')
 const puppeteer = require('puppeteer')
+const crypto = require('crypto')
+
 
 class OrcamentoService {
   static async create(data) {
@@ -23,21 +25,41 @@ class OrcamentoService {
         endereco: data.endereco ?? null,
         telefone: data.telefone ?? null,
         email: data.email ?? null,
-        LogoTipo: null // 👈 SEMPRE null por enquanto
+        LogoTipo: data.logo ?? null,
       }
 
       const emissorId = await EmissorModel.create(emissorData, conn)
 
       /* ================= CLIENTE ================= */
-      const clienteData = {
-        nome: data.nomeClient,
-        cpf_cnpj: data.cpfCnpjClient,
-        endereco: data.enderecoClient ?? null,
-        telefone: data.telefoneClient ?? null,
-        email: data.emailClient ?? null,
-      }
+     const clienteData = {
+      nome: data.nomeClient?.trim(),
+      cpf_cnpj: data.cpfCnpjClient
+        ? String(data.cpfCnpjClient).replace(/\D/g, "")
+        : null,
+      endereco: data.enderecoClient?.trim() ?? null,
+      telefone: data.telefoneClient?.trim(),
+      email: data.emailClient?.trim(),
+    }
 
-      const clienteId = await ClienteModel.create(clienteData, conn)
+    let clienteId
+
+    try {
+      // Tenta criar o cliente
+      clienteId = await ClienteModel.create(clienteData, conn)
+    } catch (error) {
+      // Se for erro de duplicidade, pega o ID existente
+      if (error.code === "ER_DUP_ENTRY") {
+        const existingId = await ClienteModel.findByCpfCnpj(clienteData.cpf_cnpj, conn)
+        if (!existingId) throw new Error("Erro ao recuperar cliente existente")
+        clienteId = existingId
+      } else {
+        throw error
+      }
+    }
+
+    console.log("Cliente ID final:", clienteId)
+      const tokenPublico = crypto.randomBytes(32).toString('hex')
+
 
       /* ================= ORÇAMENTO ================= */
       const orcamentoData = {
@@ -50,6 +72,7 @@ class OrcamentoService {
         observacoes: data.observacoes ?? null,
         Emissor_Id_emissor: emissorId,
         Cliente_Id_cliente: clienteId,
+        tokenPublico
       }
 
       const numeroOrcamento = await OrcamentoModel.create(orcamentoData, conn)
@@ -72,11 +95,29 @@ class OrcamentoService {
       }
 
       await conn.commit()
-      return { Numero_Orcamento: numeroOrcamento }
+
+      return {
+        clienteId,
+        emissorId,
+        numeroOrcamento,
+        tokenPublico
+      }
+
+
 
     } catch (error) {
       await conn.rollback()
       throw error
+    } finally {
+      conn.release()
+      
+    }
+  }
+
+  static async getAll() {
+    const conn = await db.getConnection()
+    try {
+      return await OrcamentoModel.findAllForModal(conn)
     } finally {
       conn.release()
     }
@@ -120,6 +161,7 @@ class OrcamentoService {
 }).join('')
 
   html = html
+    .replace('{{logo}}', budget.emissor_logo || '')
     .replace('{{numero}}', budget.Numero_Orcamento)
     .replace('{{emissor_nome}}', budget.emissor_nome)
     .replace('{{emissor_email}}', budget.emissor_email)

@@ -1,4 +1,7 @@
 async function routes(fastify) {
+
+
+
   fastify.register(require('./auth.routes'), {
     prefix: '/auth'
   })
@@ -10,6 +13,14 @@ async function routes(fastify) {
   fastify.register(require('./clientes.routes'), {
     prefix: '/clientes'
   })
+
+  fastify.register(require('./dashboard.routes'))
+
+  fastify.register(require('./orcamentoPublico.routes'))
+
+  
+  fastify.register(require('./logo.routes'))
+
 
 }
 

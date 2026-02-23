@@ -1,52 +1,61 @@
 const ClientesService = require('../services/clientes.service')
 
 class ClienteController {
-  static async create(req, res) {
-    try {
-      const result = await ClientesService.create(req.body)
-      return res.status(201).json(result)
-    } catch (error) {
-      return res.status(400).json({ error: error.message })
-    }
+  static async create(request, reply) {
+  try {
+    const clienteId = await ClientesService.createCliente(request.body)
+    return reply.code(201).send({ clienteId })
+  } catch (error) {
+    return reply.code(400).send({ error: error.message })
   }
+}
 
-  static async getAll(req, res) {
+  static async getAll(request, reply) {
     try {
       const result = await ClientesService.getAll()
-      return res.status(200).json(result)
+      return reply.code(200).send(result)
     } catch (error) {
-      return res.status(400).json({ error: error.message })
+      return reply.code(400).send({ error: error.message })
     }
   }
 
-  
-  static async edit(req, res) {
-  try {
-    const { id } = req.params
-    const data = req.body
-
-    if (!data || Object.keys(data).length === 0) {
-      return res.status(400).json({ error: 'Nenhum dado enviado para atualização' })
-    }
-
-    await ClientesService.edit(id, data)
-    return res.status(200).json({ message: 'Cliente atualizado com sucesso' })
-  } catch (error) {
-    return res.status(400).json({ error: error.message })
-  }
-    }
-
-  
-
-  static async delete(req, res) {
+  static async edit(request, reply) {
     try {
-      const { id } = req.params
-      await ClientesService.delete(id)
-      return res.status(204).send()
+      const { id } = request.params
+      const data = request.body
+
+      if (!data || Object.keys(data).length === 0) {
+        return reply
+          .code(400)
+          .send({ error: 'Nenhum dado enviado para atualização' })
+      }
+
+      await ClientesService.edit(id, data)
+
+      return reply.code(200).send({
+        message: 'Cliente atualizado com sucesso'
+      })
     } catch (error) {
-      return res.status(400).json({ error: error.message })
+      return reply.code(400).send({ error: error.message })
     }
   }
+
+  static async delete(request, reply) {
+  try {
+    const { id } = request.params;
+    await ClientesService.delete(Number(id));
+    return reply.code(204).send();
+  } catch (error) {
+    if (error.message.includes('foreign key')) {
+      return reply.code(409).send({
+        error: 'Não é possível excluir o cliente porque ele possui orçamentos vinculados.'
+      });
+    }
+
+    return reply.code(400).send({ error: error.message });
+  }
+}
+
 }
 
 module.exports = ClienteController

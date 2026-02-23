@@ -10,6 +10,7 @@ class OrcamentoModel {
       acrescimo: Number.isFinite(data.acrescimo) ? data.acrescimo : 0,
       validade: normalize(data.dataValidade),
       observacoes: normalize(data.observacoes),
+      token_publico: data.tokenPublico,
       Emissor_Id_emissor: data.Emissor_Id_emissor,
       Cliente_Id_cliente: data.Cliente_Id_cliente,
     }
@@ -22,6 +23,7 @@ class OrcamentoModel {
     payload.acrescimo,
     payload.validade,
     payload.observacoes,
+    payload.token_publico, 
     payload.Emissor_Id_emissor,
     payload.Cliente_Id_cliente
   ]
@@ -38,9 +40,10 @@ const [result] = await conn.execute(
     data_emissao,
     status,
     observacoes,
+    token_publico,
     Emissor_Id_emissor,
     Cliente_Id_cliente
-  ) VALUES (?, ?, ?, ?, ?, ?, NOW(), 'Pendente', ?, ?, ?)
+  ) VALUES (?, ?, ?, ?, ?, ?, NOW(), 'Pendente', ?, ?, ?, ?)
   `,
   params
 )
@@ -68,6 +71,27 @@ const [result] = await conn.execute(
     return rows
   }
 
+  static async findAllForModal(conn) {
+    const [rows] = await conn.execute(`
+      SELECT
+        o.Numero_Orcamento,
+        o.status,
+        o.data_emissao,
+        o.validade,
+        o.token_publico,
+        c.nome AS cliente,
+        SUM(i.quantidade * i.valor_unitario) AS total
+      FROM Dados_Orcamento o
+      JOIN Cliente c ON c.Id_cliente = o.Cliente_Id_cliente
+      JOIN Itens_Orcamento i 
+        ON i.Dados_Orcamento_Numero_Orcamento = o.Numero_Orcamento
+      GROUP BY o.Numero_Orcamento
+      ORDER BY o.Numero_Orcamento DESC
+    `)
+
+    return rows
+  }
+
   static async findCompleteById(numeroOrcamento, conn) {
   const [[budget]] = await conn.execute(`
     SELECT 
@@ -76,6 +100,7 @@ const [result] = await conn.execute(
       o.desconto,
       o.acrescimo,
       o.validade,
+      o.token_publico,
       o.data_emissao,
       o.status,
       o.observacoes,
@@ -86,7 +111,8 @@ const [result] = await conn.execute(
 
       c.nome  AS cliente_nome,
       c.email AS cliente_email,
-      c.telefone AS cliente_telefone
+      c.telefone AS cliente_telefone,
+      e.LogoTipo AS emissor_logo
 
     FROM Dados_Orcamento o
     JOIN Emissor e ON e.Id_emissor = o.Emissor_Id_emissor
@@ -110,6 +136,8 @@ const [result] = await conn.execute(
 
   return { budget, items, total }
 }
+
+
 
 }
 

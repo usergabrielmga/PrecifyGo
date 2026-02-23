@@ -6,6 +6,7 @@ import type { OrcamentoFormData } from "../../schemas/orcamento.schema";
 import { createOrcamento } from "../../services/orcamentoService";
 import { useState } from "react";
 import { PdfSuccessModal } from "../../models/pdfSuccessModal";
+import { uploadLogo } from "../../services/logoService";
 
 type PdfSuccessState = {
   open: boolean;
@@ -18,11 +19,16 @@ export default function Orcamento() {
     open: false,
   });
 
-  const {
+  const [logo, setLogo] = useState<File | null>(null);
+
+
+
+ const {
   register,
   handleSubmit,
   control,
   watch,
+  formState: { errors }
 } = useForm<OrcamentoFormData>({
   resolver: zodResolver(orcamentoSchema),
   defaultValues: {
@@ -32,37 +38,45 @@ export default function Orcamento() {
   }
 });
 
+
 const { fields, append, remove } = useFieldArray({
   control,
   name: "itens",
 });
 
 
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (!e.target.files || e.target.files.length === 0) return;
+  setLogo(e.target.files[0]);
+};
+
 const onSubmit = async (data: OrcamentoFormData) => {
   try {
-    const response = await createOrcamento(data);
+    let logoUrl: string | null = null;
 
-    // debug
-    console.log("Dados enviados:", data);
-    console.log("Resposta backend:", response);
+    if (logo) {
+      // Passa apenas o arquivo para o service
+      const uploadData = await uploadLogo(logo);
+      logoUrl = uploadData.url; // backend deve retornar { url: "..." }
+    }
 
-    // ajuste o nome conforme o retorno do backend
-    const numeroOrcamento = response.Numero_Orcamento || response.id;
+    // Cria o orçamento passando a URL da logo
+    const response = await createOrcamento({ ...data, logo: logoUrl });
 
     setPdfSuccess({
       open: true,
-      orcamentoId: numeroOrcamento,
+      orcamentoId: response.Numero_Orcamento || response.id,
     });
 
   } catch (error) {
-    console.error("Erro ao gerar orçamento:", error);
+    console.error(error);
     alert("Erro ao gerar orçamento");
   }
 };
 
 
   return (
-    <div className="absolute  left-1/2 -translate-x-1/2 top-30  text-[#474646]">
+    <div className="max-w-3xl mx-auto">
       <div className="flex flex-col items-center gap-2 text-[#474646] mb-10">
         <h1 className="font-bold text-2xl">Gerar Orçamento</h1>
         <p>
@@ -77,7 +91,13 @@ const onSubmit = async (data: OrcamentoFormData) => {
 
           <div className="mb-4">
             <label className="text-sm block mb-1">Logotipo (opcional)</label>
-            <input type="file" id="logo" />
+            <input 
+              type="file" 
+              id="logo" 
+              accept="image/*"
+              onChange={handleFileChange}
+          />
+
           </div>
 
           <div className="flex justify-between gap-4 mb-4">
@@ -87,12 +107,27 @@ const onSubmit = async (data: OrcamentoFormData) => {
               placeholder="Nome"
               {...register("nome")}
             />
+            
+            {errors.nome && (
+              <p className="text-red-500 text-sm mb-4">
+                {errors.nome.message}
+              </p>
+            )}
+
+
             <input
               className="w-1/2 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
               type="text"
               placeholder="CPF / CNPJ"
               {...register("cpfCnpj")}
             />
+
+            
+            {errors.cpfCnpj && (
+              <p className="text-red-500 text-sm mb-4">
+                {errors.cpfCnpj.message}
+              </p>
+            )}
           </div>
 
           <input
@@ -101,6 +136,12 @@ const onSubmit = async (data: OrcamentoFormData) => {
             placeholder="Endereço"
             {...register("endereco")}
           />
+          
+          {errors.endereco && (
+            <p className="text-red-500 text-sm mb-4">
+              {errors.endereco.message}
+            </p>
+          )}
 
           <div className="flex gap-4">
             <input
@@ -109,12 +150,25 @@ const onSubmit = async (data: OrcamentoFormData) => {
               placeholder="Telefone"
               {...register("telefone")}
             />
+
+            
+            {errors.telefone && (
+              <p className="text-red-500 text-sm mb-4">
+                {errors.telefone.message}
+              </p>
+            )}
             <input
               className="w-1/2 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
               type="email"
               placeholder="Email"
               {...register("email")}
             />
+            
+            {errors.email && (
+              <p className="text-red-500 text-sm mb-4">
+                {errors.email.message}
+              </p>
+            )}
           </div>
         </section>
 
@@ -129,12 +183,25 @@ const onSubmit = async (data: OrcamentoFormData) => {
               placeholder="Nome"
               {...register("nomeClient")}
             />
+
+            
+            {errors.nomeClient && (
+              <p className="text-red-500 text-sm mb-4">
+                {errors.nomeClient.message}
+              </p>
+            )}
             <input
               className="w-1/2 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
               type="text"
               placeholder="CPF / CNPJ"
               {...register("cpfCnpjClient")}
             />
+            
+            {errors.cpfCnpjClient && (
+              <p className="text-red-500 text-sm mb-4">
+                {errors.cpfCnpjClient.message}
+              </p>
+            )}
           </div>
 
           <input
@@ -143,6 +210,12 @@ const onSubmit = async (data: OrcamentoFormData) => {
             placeholder="Endereço"
             {...register("enderecoClient")}
           />
+          
+          {errors.enderecoClient && (
+            <p className="text-red-500 text-sm mb-4">
+              {errors.enderecoClient.message}
+            </p>
+          )}
 
           <div className="flex gap-4">
             <input
@@ -151,12 +224,24 @@ const onSubmit = async (data: OrcamentoFormData) => {
               placeholder="Telefone"
               {...register("telefoneClient")}
             />
+            
+            {errors.telefoneClient && (
+              <p className="text-red-500 text-sm mb-4">
+                {errors.telefoneClient.message}
+              </p>
+            )}
             <input
               className="w-1/2 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
               type="email"
               placeholder="Email"
               {...register("emailClient")}
             />
+            
+            {errors.emailClient && (
+              <p className="text-red-500 text-sm mb-4">
+                {errors.emailClient.message}
+              </p>
+            )}
           </div>
         </section>
 
@@ -176,6 +261,12 @@ const onSubmit = async (data: OrcamentoFormData) => {
                   placeholder="Produto ou serviço"
                   {...register(`itens.${index}.produtoServico`)}
                 />
+                
+                {errors.itens?.[index]?.produtoServico && (
+                  <p className="text-red-500 text-sm mb-4">
+                    {errors.itens[index].produtoServico.message}
+                  </p>
+                )}
 
                 <div className="flex gap-4 mb-4">
                   <input
@@ -186,6 +277,12 @@ const onSubmit = async (data: OrcamentoFormData) => {
                       valueAsNumber: true,
                     })}
                   />
+                                    
+                  {errors.itens?.[index]?.quantidade && (
+                    <p className="text-red-500 text-sm mb-4">
+                      {errors.itens[index].quantidade.message}
+                    </p>
+                  )}
 
                   <input
                     className="w-1/3 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
@@ -196,6 +293,12 @@ const onSubmit = async (data: OrcamentoFormData) => {
                       valueAsNumber: true,
                     })}
                   />
+
+                  {errors.itens?.[index]?.valorUnitario && (
+                    <p className="text-red-500 text-sm mb-4">
+                      {errors.itens[index].valorUnitario.message}
+                    </p>
+                  )}
 
                   <input
                     className="w-1/3 border border-gray-300 rounded px-3 py-2 bg-gray-100"
@@ -215,16 +318,16 @@ const onSubmit = async (data: OrcamentoFormData) => {
             );
           })}
 
-  <button
-    type="button"
-    onClick={() =>
-      append({ produtoServico: "", quantidade: 1, valorUnitario: 0 })
-    }
-    className="text-sm text-blue-600 border border-blue-600 rounded px-3 py-1 cursor-pointer hover:bg-blue-600 hover:text-white"
-  >
-    Adicionar item
-  </button>
-</section>
+          <button
+            type="button"
+            onClick={() =>
+              append({ produtoServico: "", quantidade: 1, valorUnitario: 0 })
+            }
+            className="text-sm text-blue-600 border border-blue-600 rounded px-3 py-1 cursor-pointer hover:bg-blue-600 hover:text-white"
+          >
+            Adicionar item
+          </button>
+        </section>
 
         {/* ================= Dados do Orçamento ================= */}
         <section className="border border-[#918E8E] p-4 rounded-lg">
@@ -236,16 +339,31 @@ const onSubmit = async (data: OrcamentoFormData) => {
               placeholder="Nº Orçamento"
               {...register("numeroOrcamento")}
             />
+              {errors.numeroOrcamento && ( 
+              <p className="text-red-500 text-sm mb-4">
+                {errors.numeroOrcamento.message}
+              </p>
+            )}
             <input
               className="w-1/3 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
               type="date"
               {...register("dataEmissao")}
             />
+            {errors.dataEmissao && (
+              <p className="text-red-500 text-sm mb-4">
+                {errors.dataEmissao.message}
+              </p>
+            )}
             <input
               className="w-1/3 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
               type="date"
               {...register("dataValidade")}
             />
+            {errors.dataValidade && (
+              <p className="text-red-500 text-sm mb-4">
+                {errors.dataValidade.message}
+              </p>
+            )}
           </div>
 
           <div className="flex gap-4 mb-4">
@@ -254,12 +372,15 @@ const onSubmit = async (data: OrcamentoFormData) => {
               placeholder="Acréscimo"
               type="number"
               step="0.01"
-              {...register("acrescimo", { valueAsNumber: true })}
+              {...register("acrescimo", {
+                setValueAs: v => v === "" ? undefined : parseFloat(v)
+              })}
             />
             <input
               className="w-1/2 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
               placeholder="Motivo do acréscimo"
               {...register("motivoAcrescimo")}
+              
             />
           </div>
 
@@ -269,12 +390,15 @@ const onSubmit = async (data: OrcamentoFormData) => {
               placeholder="Desconto"
               type="number"
               step="0.01"
-              {...register("desconto", { valueAsNumber: true })}
+              {...register("desconto", { 
+                setValueAs: v => v === "" ? undefined : parseFloat(v)
+               })}
             />
             <input
               className="w-1/2 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
               placeholder="Motivo do desconto"
               {...register("motivoDesconto")}
+                
             />
           </div>
 
@@ -283,12 +407,19 @@ const onSubmit = async (data: OrcamentoFormData) => {
             placeholder="Forma de pagamento"
             {...register("formaPagamento")}
           />
+          {errors.formaPagamento && (
+            <p className="text-red-500 text-sm mb-4">
+              {errors.formaPagamento.message}
+            </p>
+          )}
 
           <textarea
             className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
             rows={4}
             placeholder="Observações"
-            {...register("observacoes")}
+            {...register("observacoes", {
+              setValueAs: v => v === "" ? undefined : v
+            })}
           />
         </section>
 
@@ -307,3 +438,4 @@ const onSubmit = async (data: OrcamentoFormData) => {
     </div>
   );
 }
+

@@ -18,26 +18,35 @@ export const orcamentoSchema = z.object({
   emailClient: z.string().email("Email inválido"),
 
   /* ================= Itens ================= */
-  itens: z.array(
-    z.object({
-      produtoServico: z.string().min(1, "Produto obrigatório"),
-      quantidade: z.number().positive(),
-      valorUnitario: z.number().positive(),
-    })
-  ).min(1, "Adicione ao menos um item"),
+ itens: z.array(
+  z.object({
+    produtoServico: z
+      .string()
+      .min(1, "Produto obrigatório"),
+
+    quantidade: z
+      .number()
+      .min(1, "Quantidade deve ser maior que 0"),
+
+    valorUnitario: z
+      .number()
+      .min(0.01, "Valor deve ser maior que 0"),
+  })
+).min(1, "Adicione ao menos um item"),
+
 
   /* ================= Orçamento ================= */
-  numeroOrcamento: z.string().min(1),
-  dataEmissao: z.string().min(1),
-  dataValidade: z.string().min(1),
+  numeroOrcamento: z.string().min(1, "Número do orçamento é obrigatório"),
+  dataEmissao: z.string().min(1, "Data de emissão obrigatória"),
+  dataValidade: z.string().min(1, "Data de validade obrigatória"),
 
-  acrescimo: z.number().nonnegative().optional(),
+  acrescimo: z.number().nonnegative("Acréscimo não pode ser negativo").optional(),
   motivoAcrescimo: z.string().optional(),
 
-  desconto: z.number().nonnegative().optional(),
+  desconto: z.number().nonnegative("Desconto não pode ser negativo").optional(),
   motivoDesconto: z.string().optional(),
 
-  formaPagamento: z.string().min(1),
+  formaPagamento: z.string().min(1, "Forma de pagamento obrigatória"),
   observacoes: z.string().optional(),
 });
 

@@ -20,6 +20,21 @@ export async function createOrcamento(data: OrcamentoFormData) {
 }
 
 
+export async function getOrcamentos() {
+  const response = await fetch("http://localhost:3000/orcamentos", {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Erro backend:", errorText);
+    throw new Error("Erro ao buscar orçamentos");
+  }
+
+  return response.json();
+}
+
+
 export async function getOrcamentoPdf(id: number) {
   const response = await fetch(
     `http://localhost:3000/orcamentos/${id}/pdf`,

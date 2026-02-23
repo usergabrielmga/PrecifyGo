@@ -18,6 +18,17 @@ class ClienteModel {
     return rows
   }
 
+   static async findByCpfCnpj(cpf_cnpj, conn) {
+    if (!cpf_cnpj) return null 
+    const [rows] = await conn.execute(
+      `SELECT Id_cliente FROM Cliente WHERE cpf_cnpj = ?`,
+      [cpf_cnpj]
+    )
+    if (rows.length > 0) return rows[0].Id_cliente
+    return null
+  }
+
+
   static async edit(id, data, conn) {
   const allowedFields = [
     'nome',
@@ -54,8 +65,15 @@ class ClienteModel {
 
 
   static async delete(id, conn) {
-    await conn.execute('DELETE FROM Cliente WHERE Id_cliente = ?', [id])
+  const [result] = await conn.execute(
+    "DELETE FROM Cliente WHERE Id_cliente = ?",
+    [id]
+  );
+
+  if (result.affectedRows === 0) {
+    throw new Error("Cliente não encontrado");
   }
+}
   
 }
 
