@@ -20,7 +20,7 @@ class OrcamentoPublicoService {
   }
 
   static async responder(token, status) {
-    if (!['Aprovado', 'Rejeitado'].includes(status)) {
+    if (!['Aprovado', 'Rejeitado', 'Cancelado'].includes(status)) {
       throw new Error('Status inválido')
     }
 

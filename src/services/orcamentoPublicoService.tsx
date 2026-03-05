@@ -24,7 +24,7 @@ export async function getOrcamentoPublico(token: string): Promise<OrcamentoPubli
 
 export async function responderOrcamentoPublico(
   token: string,
-  status: "Aprovado" | "Rejeitado"
+  status: "Aprovado" | "Rejeitado" | "Cancelado"
 ) {
   const response = await fetch(
     `http://localhost:3000/orcamento/publico/${token}/responder`,

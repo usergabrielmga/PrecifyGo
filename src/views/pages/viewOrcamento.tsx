@@ -9,6 +9,7 @@ import TearCalendar from "../../assets/Tear-Off Calendar.png";
 import { Link, useParams } from "react-router-dom";
 
 import { getOrcamentos } from "../../services/orcamentoService";
+import { responderOrcamentoPublico } from "../../services/orcamentoPublicoService";
 
 
 type Orcamento = {
@@ -22,8 +23,10 @@ type Orcamento = {
 };
 
 function OrcamentoCard({ orcamento }: { orcamento: Orcamento }) {
-
   const [menuAberto, setMenuAberto] = useState(false);
+  const [orcamentoState, setOrcamentoState] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [mensagem, setMensagem] = useState<string | null>(null)
 
 
   const compartilhar = async () => {
@@ -43,11 +46,36 @@ function OrcamentoCard({ orcamento }: { orcamento: Orcamento }) {
     setMenuAberto(false);
   };
 
+  const cancelOrcamento = async (status: "Aprovado" | "Rejeitado" | "Cancelado") => {
+
+     if (!orcamento.token_publico) {
+      setMensagem("Token inválido")
+      setLoading(false)
+      return
+    }
+  
+    try {
+      await responderOrcamentoPublico(orcamento.token_publico, status)
+      setMensagem(
+        status === "Aprovado"
+          ? "✅ Orçamento aprovado com sucesso!"
+          : status === "Cancelado"
+          ? "⛔ Orçamento cancelado."
+          : "❌ Orçamento recusado."
+      )
+  
+    
+      setOrcamentoState((prev: any) => prev ? { ...prev, status } : prev)
+    } catch (err: any) {
+      setMensagem(err.message)
+    }
+  }
+
 
   return (
     <div className="relative bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
       
-      {/* TOPO */}
+    
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-sm">
@@ -61,6 +89,8 @@ function OrcamentoCard({ orcamento }: { orcamento: Orcamento }) {
                   ? "bg-yellow-100 text-yellow-700"
                   : orcamento.status === "Aprovado"
                   ? "bg-green-100 text-green-700"
+                  : orcamento.status === "Cancelado"
+                  ? "bg-[#A9A9A9] text-[#302f2f]"
                   : "bg-red-100 text-red-700"
               }
             `}
@@ -77,17 +107,25 @@ function OrcamentoCard({ orcamento }: { orcamento: Orcamento }) {
         />
       </div>
       {menuAberto && (
-            <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-md z-10">
+            <div className="absolute right-0 mt-2 w-50 bg-white border rounded-lg shadow-md z-10">
               <button
                 onClick={compartilhar}
                 className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
               >
                 🔗 Compartilhar
               </button>
+
+              <button
+                onClick={() => cancelOrcamento("Cancelado")}
+                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+              >
+                Cancelar orçamento
+              </button>
+
             </div>
       )}
 
-      {/* CONTEÚDO */}
+      
       <div className="flex flex-col gap-2 text-xs text-gray-700">
         <div className="flex items-center gap-2">
           <img src={Person} className="w-4 h-4" />
@@ -167,7 +205,7 @@ export default function ViewOrcamento() {
         </Link>
       </div>
 
-      {/* GRID */}
+      
       {loading ? (
         <p className="text-sm text-gray-500">Carregando orçamentos...</p>
       ) : (

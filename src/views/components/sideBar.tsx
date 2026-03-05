@@ -41,6 +41,11 @@ export default function SideBar() {
                         <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                         Rejeitados
                     </Link>
+
+                    <Link to="/viewOrcamento/Cancelado" className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-[#A9A9A9] rounded-full"></div>
+                        Cancelados
+                    </Link>
                     </ul>
                 </div>
 

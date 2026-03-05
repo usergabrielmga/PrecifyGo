@@ -69,6 +69,7 @@ export default function Dashboard() {
         backgroundColor: [
           "#f6ce35",
           "#22c55e",
+          "#A9A9A9	",
           "#f97316",
           "#ef4444"
         ],
@@ -159,7 +160,7 @@ export default function Dashboard() {
                           : orc.status === "Pendente"
                           ? "bg-yellow-100 text-yellow-700"
                           : orc.status === "Cancelado"
-                          ? "bg-orange-100 text-orange-700"
+                          ? "bg-[#A9A9A9] text-[#302f2f]"
                           : "bg-red-100 text-red-700"
                       }
                     `}
