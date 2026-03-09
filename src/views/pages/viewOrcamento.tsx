@@ -8,19 +8,13 @@ import MenuVertical from "../../assets/Menu Vertical.png";
 import TearCalendar from "../../assets/Tear-Off Calendar.png";
 import { Link, useParams } from "react-router-dom";
 
-import { getOrcamentos } from "../../services/orcamentoService";
+import { getOrcamentoPdf, getOrcamentos } from "../../services/orcamentoService";
 import { responderOrcamentoPublico } from "../../services/orcamentoPublicoService";
+import { Download } from "lucide-react";
+import type { Orcamento } from "../../types/orcamento";
 
 
-type Orcamento = {
-  token_publico: any;
-  id: number;
-  status: string;
-  cliente: string;
-  data_emissao: string;
-  validade: string;
-  total: number;
-};
+
 
 function OrcamentoCard({ orcamento }: { orcamento: Orcamento }) {
   const [menuAberto, setMenuAberto] = useState(false);
@@ -28,6 +22,20 @@ function OrcamentoCard({ orcamento }: { orcamento: Orcamento }) {
   const [loading, setLoading] = useState(true)
   const [mensagem, setMensagem] = useState<string | null>(null)
 
+  const DowloadPDF = async (numero_orcamento: number) => {
+    try { 
+      const blob = await getOrcamentoPdf(numero_orcamento);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `orcamento-${numero_orcamento}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+    catch (err: any) {
+      setMensagem("Erro ao gerar PDF")
+    }
+  }
 
   const compartilhar = async () => {
     console.log("Token:", orcamento.token_publico);
@@ -112,7 +120,14 @@ function OrcamentoCard({ orcamento }: { orcamento: Orcamento }) {
                 onClick={compartilhar}
                 className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
               >
-                🔗 Compartilhar
+                Compartilhar
+              </button>
+
+              <button
+                onClick={() => DowloadPDF(orcamento.Numero_Orcamento)}
+                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+              >
+                Baixar PDF
               </button>
 
               <button
