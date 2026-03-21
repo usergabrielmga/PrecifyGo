@@ -5,6 +5,8 @@ type Cliente = {
   nome: string;
   email?: string;
   telefone?: string;
+  endereco?: string;
+  cpf_cnpj?: string;
 };
 
 type Props = {
@@ -17,6 +19,8 @@ export default function EditClienteModal({ cliente, onClose, onSave }: Props) {
   const [nome, setNome] = useState(cliente.nome);
   const [email, setEmail] = useState(cliente.email || "");
   const [telefone, setTelefone] = useState(cliente.telefone || "");
+  const [endereco, setEndereco] = useState(cliente.endereco || "");
+  const [cpfCnpj, setCpfCnpj] = useState(cliente.cpf_cnpj || "");
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -40,6 +44,20 @@ export default function EditClienteModal({ cliente, onClose, onSave }: Props) {
 
           <input
             className="w-full border rounded-lg px-3 py-2"
+            placeholder="Endereço"
+            value={endereco}
+            onChange={(e) => setEndereco(e.target.value)}
+          />
+
+          <input
+            className="w-full border rounded-lg px-3 py-2"
+            placeholder="CPF/CNPJ"
+            value={cpfCnpj}
+            onChange={(e) => setCpfCnpj(e.target.value)}
+          />
+
+          <input
+            className="w-full border rounded-lg px-3 py-2"
             placeholder="Telefone"
             value={telefone}
             onChange={(e) => setTelefone(e.target.value)}
@@ -55,7 +73,7 @@ export default function EditClienteModal({ cliente, onClose, onSave }: Props) {
           </button>
 
           <button
-            onClick={() => onSave({ nome, email, telefone })}
+            onClick={() => onSave({ nome, email, telefone, endereco, cpf_cnpj: cpfCnpj })}
             className="px-4 py-2 rounded-lg bg-[#EA2E52] text-white hover:opacity-90"
           >
             Salvar

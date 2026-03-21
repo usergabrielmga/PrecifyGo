@@ -19,8 +19,9 @@ class DashboardService {
         FROM Dados_Orcamento d
         JOIN Itens_Orcamento i
           ON i.Dados_Orcamento_Numero_Orcamento = d.Numero_Orcamento
-        WHERE MONTH(d.data_emissao) = MONTH(CURRENT_DATE())
-          AND YEAR(d.data_emissao) = YEAR(CURRENT_DATE())
+        WHERE d.status = 'Aprovado'
+        AND d.data_resposta >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
+        AND d.data_resposta < DATE_FORMAT(CURDATE() + INTERVAL 1 MONTH, '%Y-%m-01');
       `)
 
       /* Total de orçamentos */

@@ -1,39 +1,13 @@
 import Logo from '../../imgs/logo.png'
 import Google from '../../assets/google.png'
 import Gmail from '../../assets/Gmail Logo.png'
-import { useState } from 'react'
-import { LoginUser, registerUser } from '../../services/authService';
-import { useNavigate } from 'react-router-dom';
+import { useRegister } from '../../hooks/useRegister'
+
 
 export default function Register() {
-    const navigate = useNavigate()
-
-    const [form, setForm] = useState({
-        nome: '',
-        email: '',
-        senha: ''
-    });
-
-    const handleRegister = async () => {
-        try {
-            await registerUser(form);
-            setForm({ nome: '', email: '', senha: '' });
-            console.log('Usuário registrado com sucesso');
-            
-            const loginRes = await LoginUser({
-                email: form.email,
-                senha: form.senha
-            })
-
-            localStorage.setItem('token', loginRes.token)
-            navigate('/dashboard')
-
-        } catch (error) {
-            console.error('Erro ao registrar:', error);
-        }
-    };
-
-
+  
+    const { form, setForm, handleRegister } = useRegister()
+   
 
     return (
         <div className="flex flex-col items-center w-90 py-8 bg-[#EA2E52] rounded-xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">

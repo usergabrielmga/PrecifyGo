@@ -1,56 +1,12 @@
 import Logo from '../../imgs/logo.png'
 import Google from '../../assets/google.png'
 import Gmail from '../../assets/Gmail Logo.png'
-import { useState } from 'react'
-import { LoginUser } from '../../services/authService';
-import { useGoogleLogin } from '@react-oauth/google';
-import { loginGoogle } from '../../services/authService';
-import { useNavigate } from 'react-router-dom';
+import { useLogin } from '../../hooks/useLogin';
 
 
 export default function Register() {
-    const navigate = useNavigate()
-
-    const [form, setForm] = useState({
-        email: '',
-        senha: ''
-    });
-
-    const handleRegister = async () => {
-
-        try {
-            const res = await LoginUser(form);
-            setForm({email: '', senha: '' });
-            localStorage.setItem('token', res.token);
-
-            
-            console.log('Usuário logado com sucesso');
-            navigate('/dashboard');
-
-        } catch (error) {
-            console.error('Erro ao registrar:', error);
-        }
-    };
-
     
-    const googleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-        const res = await loginGoogle(tokenResponse.access_token);
-
-        console.log(res);
-        console.log('TOKEN GOOGLE:', tokenResponse);
-
-        localStorage.setItem('token', res.token) 
-        navigate('/dashboard');
-    
-    },
-    onError: () => {
-        console.error('Erro ao logar com Google');
-    }
-    });
-        
-
-
+    const { form, setForm, handleRegister, googleLogin } = useLogin()
 
     return (
         <div className="flex flex-col items-center w-90 py-8 bg-[#EA2E52] rounded-xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">

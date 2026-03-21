@@ -1,212 +1,18 @@
 import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-
-import Person from "../../assets/Person.png";
-import Calendar from "../../assets/Calendar.png";
-import Cash from "../../assets/Cash.png";
-import MenuVertical from "../../assets/Menu Vertical.png";
-import TearCalendar from "../../assets/Tear-Off Calendar.png";
 import { Link, useParams } from "react-router-dom";
-
-import { getOrcamentoPdf, getOrcamentos } from "../../services/orcamentoService";
-import { responderOrcamentoPublico } from "../../services/orcamentoPublicoService";
-import { Download } from "lucide-react";
+import { getOrcamentos } from "../../services/orcamentoService";
 import type { Orcamento } from "../../types/orcamento";
-
-
-
-
-function OrcamentoCard({ orcamento }: { orcamento: Orcamento }) {
-  const [menuAberto, setMenuAberto] = useState(false);
-  const [orcamentoState, setOrcamentoState] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [mensagem, setMensagem] = useState<string | null>(null)
-
-  const DowloadPDF = async (numero_orcamento: number) => {
-    try { 
-      const blob = await getOrcamentoPdf(numero_orcamento);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `orcamento-${numero_orcamento}.pdf`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    }
-    catch (err: any) {
-      setMensagem("Erro ao gerar PDF")
-    }
-  }
-
-  const compartilhar = async () => {
-    console.log("Token:", orcamento.token_publico);
-
-    if (!orcamento.token_publico) return;
-
-    const link = `${window.location.origin}/orcamento-publico/${orcamento.token_publico}`;
-
-    try {
-      await navigator.clipboard.writeText(link);
-      console.log("Link copiado:", link);
-    } catch (error) {
-      console.error("Erro ao copiar link:", error);
-    }
-
-    setMenuAberto(false);
-  };
-
-  const cancelOrcamento = async (status: "Aprovado" | "Rejeitado" | "Cancelado") => {
-
-     if (!orcamento.token_publico) {
-      setMensagem("Token inválido")
-      setLoading(false)
-      return
-    }
-  
-    try {
-      await responderOrcamentoPublico(orcamento.token_publico, status)
-      setMensagem(
-        status === "Aprovado"
-          ? "✅ Orçamento aprovado com sucesso!"
-          : status === "Cancelado"
-          ? "⛔ Orçamento cancelado."
-          : "❌ Orçamento recusado."
-      )
-  
-    
-      setOrcamentoState((prev: any) => prev ? { ...prev, status } : prev)
-    } catch (err: any) {
-      setMensagem(err.message)
-    }
-  }
-
-
-  return (
-    <div className="relative bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
-      
-    
-      <div className="flex justify-between items-center mb-3">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-sm">
-            #{orcamento.id}
-          </span>
-
-          <span
-            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full
-              ${
-                orcamento.status === "Pendente"
-                  ? "bg-yellow-100 text-yellow-700"
-                  : orcamento.status === "Aprovado"
-                  ? "bg-green-100 text-green-700"
-                  : orcamento.status === "Cancelado"
-                  ? "bg-[#A9A9A9] text-[#302f2f]"
-                  : "bg-red-100 text-red-700"
-              }
-            `}
-          >
-            {orcamento.status}
-          </span>
-        </div>
-
-        <img
-          src={MenuVertical}
-          alt="Menu"
-          className="w-4 h-4 cursor-pointer"
-          onClick={() => setMenuAberto(!menuAberto)}
-        />
-      </div>
-      {menuAberto && (
-            <div className="absolute right-0 mt-2 w-50 bg-white border rounded-lg shadow-md z-10">
-              <button
-                onClick={compartilhar}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-              >
-                Compartilhar
-              </button>
-
-              <button
-                onClick={() => DowloadPDF(orcamento.Numero_Orcamento)}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-              >
-                Baixar PDF
-              </button>
-
-              <button
-                onClick={() => cancelOrcamento("Cancelado")}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-              >
-                Cancelar orçamento
-              </button>
-
-            </div>
-      )}
-
-      
-      <div className="flex flex-col gap-2 text-xs text-gray-700">
-        <div className="flex items-center gap-2">
-          <img src={Person} className="w-4 h-4" />
-          <span>
-            <strong>Cliente:</strong> {orcamento.cliente}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <img src={Calendar} className="w-4 h-4" />
-          <span>
-            <strong>Data:</strong> {orcamento.data_emissao}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <img src={TearCalendar} className="w-4 h-4" />
-          <span>
-            <strong>Validade:</strong> {orcamento.validade}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 mt-2">
-          <img src={Cash} className="w-4 h-4" />
-          <span className="font-semibold text-sm text-gray-900">
-            R$ {Number(orcamento.total).toFixed(2)}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
+import OrcamentoCard from "../components/Orcamento.card";
+import { useViewOrcamentos } from "../../hooks/useViewOrcamentos";
 
 export default function ViewOrcamento() {
-  const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { status } = useParams();
+   const { status } = useParams();
 
-  useEffect(() => {
-  async function fetchOrcamentos() {
-    try {
-      const data = await getOrcamentos();
-
-      const filtrados = status
-        ? data.filter((o: { status: string; }) =>
-            o.status.toLowerCase() === status.toLowerCase()
-          )
-        : data;
-
-        console.log("Orçamentos filtrados:", filtrados);
-
-      setOrcamentos(filtrados);
-    } catch (error) {
-      console.error("Erro ao buscar orçamentos", error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  fetchOrcamentos();
-}, [status]);
+  const { orcamentos, loading } = useViewOrcamentos(status);
 
   return (
     <main className="pt-10 px-10 text-[#474646] rounded-2xl bg-[#F9F9F9] max-w-7xl mx-auto">
-      
-  
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">Orçamentos</h1>
@@ -215,19 +21,21 @@ export default function ViewOrcamento() {
           </p>
         </div>
 
-        <Link to="/orcamento" className="flex items-center gap-2 bg-[#EA2E52] text-white px-4 py-2 rounded-lg hover:opacity-90 transition">
+        <Link
+          to="/orcamento"
+          className="flex items-center gap-2 bg-[#EA2E52] text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+        >
           Novo orçamento <FaPlus />
         </Link>
       </div>
 
-      
       {loading ? (
         <p className="text-sm text-gray-500">Carregando orçamentos...</p>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {orcamentos.map((orcamento, key) => (
+          {orcamentos.map((orcamento) => (
             <OrcamentoCard
-              key={key}
+              key={orcamento.id}
               orcamento={orcamento}
             />
           ))}

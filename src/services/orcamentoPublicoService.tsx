@@ -1,16 +1,4 @@
-export interface OrcamentoPublico {
-  Numero_Orcamento: string | number
-  cliente: string
-  status: "Pendente" | "Aprovado" | "Rejeitado" | "Cancelado"
-  itens: Array<{
-    produto_servico: string
-    quantidade: number
-    valor_unitario: number
-    total_item: number
-  }>
-  total: number
-  
-}
+import type { OrcamentoPublico } from "../types/orcamentoPublico"
 
 
 export async function getOrcamentoPublico(token: string): Promise<OrcamentoPublico> {

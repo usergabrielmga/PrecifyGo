@@ -27,6 +27,8 @@ export async function getClientes() {
     nome: cliente.nome,
     email: cliente.email,
     telefone: cliente.telefone,
+    endereco: cliente.endereco,
+    cpf_cnpj: cliente.cpf_cnpj,
   }));
 }
 
@@ -51,7 +53,7 @@ export async function createCliente(
 
 export async function updateCliente(
   id: number,
-  data: { nome: string; email: string; telefone: string }
+  data: { nome: string; email: string; telefone: string; endereco: string; cpf_cnpj: string }
 ) {
   const response = await fetch(`http://localhost:3000/clientes/${id}`, {
     method: "PUT",

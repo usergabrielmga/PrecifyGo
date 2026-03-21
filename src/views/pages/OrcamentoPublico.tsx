@@ -1,56 +1,10 @@
-import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
-import { getOrcamentoPublico, responderOrcamentoPublico } from "../../services/orcamentoPublicoService"
+
+import { useOrcamentoPublico } from "../../hooks/useOrcamentoPublico"
 
 export default function OrcamentoPublico() {
-  const { token } = useParams()
-  const [orcamento, setOrcamento] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [mensagem, setMensagem] = useState<string | null>(null)
 
-  useEffect(() => {
-  window.scrollTo({ top: 0 })
-
-  const fetchOrcamento = async () => {
-    if (!token) {
-      setMensagem("Token inválido")
-      setLoading(false)
-      return
-    }
-
-    try {
-      const data = await getOrcamentoPublico(token)
-      setOrcamento(data)
-    } catch (err: any) {
-      setMensagem("Orçamento inválido ou não encontrado")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  fetchOrcamento()
-}, [token])
-
-const responder = async (status: "Aprovado" | "Rejeitado") => {
-  if (!token) {
-    setMensagem("Token inválido")
-    return
-  }
-
-  try {
-    await responderOrcamentoPublico(token, status)
-    setMensagem(
-      status === "Aprovado"
-        ? "✅ Orçamento aprovado com sucesso!"
-        : "❌ Orçamento recusado."
-    )
-
-    // opcional: atualizar status local
-    setOrcamento((prev: any) => prev ? { ...prev, status } : prev)
-  } catch (err: any) {
-    setMensagem(err.message)
-  }
-}
+  const { orcamento, loading, mensagem, responder } = useOrcamentoPublico()
+ 
 
   if (loading) {
     return <p className="p-6 text-center">Carregando orçamento...</p>
@@ -65,6 +19,10 @@ const responder = async (status: "Aprovado" | "Rejeitado") => {
       </div>
     )
   }
+
+  if (!orcamento) {
+  return <p>Orçamento não encontrado</p>
+}
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 flex justify-center">
