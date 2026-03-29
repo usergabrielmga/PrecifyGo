@@ -8,6 +8,7 @@ import ViewOrcamento from '../views/pages/viewOrcamento'
 import Clientes from '../views/pages/clientes'
 import OrcamentoPublico from '../views/pages/OrcamentoPublico'
 import PrivateLayout from '../layouts/PrivateLayout'
+import Apresentation from '../views/pages/apresentation'
 
 export default function AppRoutes() {
   return (
@@ -15,6 +16,10 @@ export default function AppRoutes() {
       
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route
+        path="/inicio"
+        element={<Apresentation />}
+      />
 
       <Route
         path="/orcamento-publico/:token"

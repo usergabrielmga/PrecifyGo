@@ -2,6 +2,7 @@ import Logo from '../../imgs/logo.png'
 import Google from '../../assets/google.png'
 import Gmail from '../../assets/Gmail Logo.png'
 import { useRegister } from '../../hooks/useRegister'
+import { Link } from 'react-router-dom'
 
 
 export default function Register() {
@@ -23,7 +24,7 @@ export default function Register() {
                 <img src={Google} alt="" className='w-10 h-10 cursor-pointer' />
                 <img src={Gmail} alt="" className='w-10 h-10 cursor-pointer' />
             </div>
-            <p className='text-white mb-5 text-sm cursor-pointer'>Não tem sua conta! crie sua conta agora</p>
+            <Link to="/login" className='text-white mb-5 text-sm cursor-pointer'>Já tem sua conta? Faça login agora</Link>
             <button className="mt-2 p-2 rounded-lg w-80 bg-[#474646] text-[#ffffff] font-bold hover:bg-[#f0f0f0] cursor-pointer" onClick={() => handleRegister()}>Registrar</button>
         </div>
     )

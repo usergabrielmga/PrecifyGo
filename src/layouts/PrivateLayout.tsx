@@ -12,7 +12,7 @@ export default function PrivateLayout({ children }: PrivateLayoutProps) {
   return (
     <div className="flex flex-col min-h-screen">
 
-      <Header />
+      <Header page="private"/>
 
       <div className="flex flex-1">
         <SideBar />
