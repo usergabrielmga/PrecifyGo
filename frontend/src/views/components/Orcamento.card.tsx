@@ -21,7 +21,7 @@ function OrcamentoCard({ orcamento }: { orcamento: Orcamento }) {
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-sm">
-            #{orcamento.id}
+            #{orcamento.Numero_Orcamento}
           </span>
 
           <span

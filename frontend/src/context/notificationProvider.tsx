@@ -9,7 +9,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
     setTimeout(() => {
       setMessage("");
-    }, 3000); // 3 segundos
+    }, 3000); 
   }
 
   return (

@@ -1,4 +1,4 @@
-type Orcamento = {
+export type Orcamento = {
   Numero_Orcamento: any;
   token_publico: any;
   id: number;

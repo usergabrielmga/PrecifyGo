@@ -55,12 +55,12 @@ const onSubmit = async (data: OrcamentoFormData) => {
     let logoUrl: string | null = null;
 
     if (logo) {
-      // Passa apenas o arquivo para o service
+      
       const uploadData = await uploadLogo(logo);
-      logoUrl = uploadData.url; // backend deve retornar { url: "..." }
+      logoUrl = uploadData.url; 
     }
 
-    // Cria o orçamento passando a URL da logo
+    
     const response = await createOrcamento({ ...data, logo: logoUrl });
 
     setPdfSuccess({

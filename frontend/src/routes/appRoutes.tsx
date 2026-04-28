@@ -13,13 +13,13 @@ import Apresentation from '../views/pages/apresentation'
 export default function AppRoutes() {
   return (
     <Routes>
-      
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
       <Route
         path="/inicio"
         element={<Apresentation />}
       />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      
 
       <Route
         path="/orcamento-publico/:token"

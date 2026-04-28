@@ -27,7 +27,7 @@ export function useClient() {
     }
   }
 
-  // 🔥 NORMALIZAÇÃO (resolve TODOS os erros de undefined)
+ 
   function normalizeCliente(data: Omit<Cliente, "id">) {
     return {
       nome: data.nome,
@@ -38,7 +38,7 @@ export function useClient() {
     };
   }
 
-  // ✅ CREATE
+
   async function handleCreate(data: Omit<Cliente, "id">) {
     try {
       const payload = normalizeCliente(data);
@@ -60,7 +60,7 @@ export function useClient() {
     }
   }
 
-  // ✅ UPDATE
+
   async function handleUpdate(id: number, data: Omit<Cliente, "id">) {
     try {
       const payload = normalizeCliente(data);
@@ -80,7 +80,7 @@ export function useClient() {
     }
   }
 
-  // ✅ DELETE
+
   async function handleDelete(id: number) {
     try {
       await deleteCliente(id);
