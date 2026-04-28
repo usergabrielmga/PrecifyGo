@@ -21,4 +21,8 @@ fastify.register(require('@fastify/multipart'))
 // Rotas
 fastify.register(require('./routes'))
 
+fastify.get('/', async () => {
+  return { status: 'API online 🚀' }
+})
+
 module.exports = fastify;

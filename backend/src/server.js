@@ -13,5 +13,7 @@ const start = async () => {
     process.exit(1)
   }
 }
-
+fastify.get('/', async () => {
+  return { status: 'API online 🚀' }
+})
 start()
