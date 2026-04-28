@@ -1,10 +1,17 @@
 const app = require('./app')
 
-app.listen({ port: 3000 }, (err, address) => {
-  if (err) {
+const start = async () => {
+  try {
+    await app.listen({
+      port: process.env.PORT || 3000,
+      host: '0.0.0.0' 
+    })
+
+    console.log('🚀 Server rodando')
+  } catch (err) {
     app.log.error(err)
     process.exit(1)
   }
+}
 
-  console.log(`🚀 Server rodando em ${address}`)
-})
+start()

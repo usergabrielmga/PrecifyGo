@@ -6,25 +6,19 @@ const fastify = require('fastify')({
 
 const cors = require('@fastify/cors')
 
-
-// 🔹 CORS (antes das rotas)
+// CORS
 fastify.register(cors, {
-  origin: 'http://localhost:5173',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  origin: true, // permite qualquer origem em produção
 })
 
-
-
-// 🔹 JWT
+// JWT
 fastify.register(require('@fastify/jwt'), {
   secret: process.env.JWT_SECRET || 'supersecret'
 })
 
-fastify.register(require('@fastify/multipart'));
+fastify.register(require('@fastify/multipart'))
 
-// 🔹 Rotas
+// Rotas
 fastify.register(require('./routes'))
 
-module.exports = fastify
+module.exports = fastify;
