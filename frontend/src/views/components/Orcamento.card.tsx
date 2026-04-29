@@ -1,8 +1,8 @@
-import Person from "../../assets/Person.png";
-import Calendar from "../../assets/Calendar.png";
-import Cash from "../../assets/Cash.png";
-import MenuVertical from "../../assets/Menu Vertical.png";
-import TearCalendar from "../../assets/Tear-Off Calendar.png";
+import Person from "../../assets/person.png";
+import Calendar from "../../assets/calendar.png";
+import Cash from "../../assets/cash.png";
+import MenuVertical from "../../assets/menu vertical.png";
+import TearCalendar from "../../assets/tear-off calendar.png";
 import type { Orcamento } from "../../types/orcamento";
 import { useOrcamentoCard } from "../../hooks/useOrcamentoCard";
 

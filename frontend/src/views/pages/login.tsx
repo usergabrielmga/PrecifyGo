@@ -1,6 +1,6 @@
 import Logo from '../../imgs/logo.png'
 import Google from '../../assets/google.png'
-import Gmail from '../../assets/Gmail Logo.png'
+import Gmail from '../../assets/gmail logo.png'
 import { useLogin } from '../../hooks/useLogin';
 import { Link } from 'react-router-dom';
 

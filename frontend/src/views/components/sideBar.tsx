@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import Exterior from "../../assets/exterior.png";
 import Group from "../../assets/group.png";
-import Sign from "../../assets/Sign Document.png";
+import Sign from "../../assets/sign document.png";
 import { Link } from "react-router-dom";
 import LogoutButton from "../../models/logoutModal";
 import Profile from "../../imgs/profile.png";

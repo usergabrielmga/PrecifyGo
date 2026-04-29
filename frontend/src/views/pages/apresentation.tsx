@@ -2,7 +2,7 @@ import HeaderPublic from "../components/headerPublic";
 import Dash from "../../imgs/dash.png";
 import Form from "../../imgs/form.png";
 import Done from "../../imgs/done.png";
-import orcPublic from "../../imgs/orcPublic.png";
+import orcPublic from "../../imgs/orcpublic.png";
 import Rodape from "../components/rodape";
 import { Link } from "react-router";
 
