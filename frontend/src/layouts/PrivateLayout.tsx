@@ -1,7 +1,7 @@
 
 import type { ReactNode } from "react"
 import SideBar from "../views/components/sideBar"
-import Rodape from "../views/components/rodape"
+
 
 interface PrivateLayoutProps {
   children: ReactNode
