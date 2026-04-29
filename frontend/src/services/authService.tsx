@@ -1,9 +1,12 @@
+
 import { type LoginResponse, type RegisterResponse, type User } from '../types/user';
+
+const backend = import.meta.env.VITE_BACKEND_URL;
 
 export const registerUser = async (
   userData: Omit<User, 'id'>
 ): Promise<RegisterResponse> => {
-  const response = await fetch('http://localhost:3000/auth/register', {
+  const response = await fetch(`${backend}/auth/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -22,7 +25,7 @@ export const registerUser = async (
 export const LoginUser = async (
   userData: { email: string; senha: string }
 ): Promise<LoginResponse> => {
-  const response = await fetch('http://localhost:3000/auth/login', {
+  const response = await fetch(`${backend}/auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -40,7 +43,7 @@ export const LoginUser = async (
 
 
 export const loginGoogle = async (accessToken: string) => {
-  const response = await fetch('http://localhost:3000/auth/google', {
+  const response = await fetch(`${backend}/auth/google`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
