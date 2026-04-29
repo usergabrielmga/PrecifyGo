@@ -7,6 +7,12 @@ import Rodape from "../components/rodape";
 import { Link } from "react-router";
 
 export default function Apresentation() {
+
+    
+const backend = import.meta.env.VITE_BACKEND_URL;
+
+console.log('URL do backend:', backend);
+
     return (
         <div className="overflow-x-hidden">
             <HeaderPublic />
