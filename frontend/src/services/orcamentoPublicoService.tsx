@@ -1,8 +1,9 @@
 import type { OrcamentoPublico } from "../types/orcamentoPublico"
 
+const backend = import.meta.env.VITE_BACKEND_URL;
 
 export async function getOrcamentoPublico(token: string): Promise<OrcamentoPublico> {
-  const response = await fetch(`http://localhost:3000/orcamento/publico/${token}`)
+  const response = await fetch(`${backend}/orcamento/publico/${token}`)
   if (!response.ok) {
     throw new Error("Orçamento não encontrado")
   }
@@ -15,7 +16,7 @@ export async function responderOrcamentoPublico(
   status: "Aprovado" | "Rejeitado" | "Cancelado"
 ) {
   const response = await fetch(
-    `http://localhost:3000/orcamento/publico/${token}/responder`,
+    `${backend}/orcamento/publico/${token}/responder`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

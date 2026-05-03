@@ -1,8 +1,10 @@
+const backend = import.meta.env.VITE_BACKEND_URL;
+
 export async function uploadLogo(file: File) {
   const formData = new FormData()
   formData.append("logo", file)
 
-  const response = await fetch("http://localhost:3000/upload-logo", {
+  const response = await fetch(`${backend}/upload-logo`, {
     method: "POST",
     body: formData
   })

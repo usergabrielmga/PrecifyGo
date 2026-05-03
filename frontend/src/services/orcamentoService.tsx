@@ -1,8 +1,10 @@
 import type { OrcamentoFormData } from "../schemas/orcamento.schema";
 
+const backend = import.meta.env.VITE_BACKEND_URL;
+
 export async function createOrcamento(data: OrcamentoFormData) {
   console.log("Dados enviados para o backend:", JSON.stringify(data, null, 2));
-  const response = await fetch("http://localhost:3000/orcamentos", {
+  const response = await fetch(`${backend}/orcamentos`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -21,7 +23,7 @@ export async function createOrcamento(data: OrcamentoFormData) {
 
 
 export async function getOrcamentos() {
-  const response = await fetch("http://localhost:3000/orcamentos", {
+  const response = await fetch(`${backend}/orcamentos`, {
     method: "GET",
   });
 
@@ -37,7 +39,7 @@ export async function getOrcamentos() {
 
 export async function getOrcamentoPdf(id: number) {
   const response = await fetch(
-    `http://localhost:3000/orcamentos/${id}/pdf`,
+    `${backend}/orcamentos/${id}/pdf`,
     {
       method: "GET",
     }
