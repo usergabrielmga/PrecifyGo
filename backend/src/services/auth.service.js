@@ -3,9 +3,9 @@ const bcrypt = require('bcryptjs')
 
 class AuthService {
   async register(data) {
-    const { nome, email, senha } = data
+    const { name, email, password } = data
 
-    if (!email || !senha) {
+    if (!email || !password) {
       throw new Error('Email e senha obrigatórios')
     }
 
@@ -14,27 +14,27 @@ class AuthService {
       throw new Error('Usuário já existe')
     }
 
-    const senhaHash = await bcrypt.hash(senha, 10)
+    const passwordHash = await bcrypt.hash(password, 10)
 
     await UserModel.createLocal({
-      nome,
+      name,
       email,
-      senha: senhaHash
+      password: passwordHash
     })
 
     return { message: 'Usuário registrado com sucesso' }
   }
 
   async login(data) {
-    const { email, senha } = data
+    const { email, password } = data
 
     const user = await UserModel.findByEmail(email)
     if (!user) {
       throw new Error('Usuário não encontrado')
     }
 
-    const senhaValida = await bcrypt.compare(senha, user.senha)
-    if (!senhaValida) {
+    const passwordValid = await bcrypt.compare(password, user.password)
+    if (!passwordValid) {
       throw new Error('Senha inválida')
     }
 
