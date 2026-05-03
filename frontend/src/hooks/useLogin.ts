@@ -15,7 +15,7 @@ export function useLogin() {
     const handleRegister = async () => {
 
         try {
-            const res = await LoginUser({ email: form.email, senha: form.password });
+            const res = await LoginUser({ email: form.email, password: form.password });
             setForm({email: '', password: '' });
             localStorage.setItem('token', res.token);
 

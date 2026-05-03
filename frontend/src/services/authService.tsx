@@ -23,7 +23,7 @@ export const registerUser = async (
 
 
 export const LoginUser = async (
-  userData: { email: string; senha: string }
+  userData: { email: string; password: string }
 ): Promise<LoginResponse> => {
   const response = await fetch(`${backend}/auth/login`, {
     method: 'POST',

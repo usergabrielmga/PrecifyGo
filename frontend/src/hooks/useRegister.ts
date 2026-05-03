@@ -20,7 +20,7 @@ export function useRegister() {
             
             const loginRes = await LoginUser({
                 email: form.email,
-                senha: form.password
+                password: form.password
             })
 
             localStorage.setItem('token', loginRes.token)
