@@ -9,14 +9,14 @@ export function useLogin() {
 
     const [form, setForm] = useState({
         email: '',
-        senha: ''
+        password: ''
     });
 
     const handleRegister = async () => {
 
         try {
-            const res = await LoginUser(form);
-            setForm({email: '', senha: '' });
+            const res = await LoginUser({ email: form.email, senha: form.password });
+            setForm({email: '', password: '' });
             localStorage.setItem('token', res.token);
 
             

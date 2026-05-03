@@ -16,9 +16,9 @@ export default function Register() {
                 <img src={Logo} alt="" />
             </div>
             <form action="" className='flex flex-col items-center mb-5'>
-                <input type="text" placeholder="Nome" className="mt-10 p-2 rounded-lg w-80 bg-[#ffff] border-0 outline-none" value={form.nome} onChange={(e) => setForm({...form, nome: e.target.value})} />
+                <input type="text" placeholder="Nome" className="mt-10 p-2 rounded-lg w-80 bg-[#ffff] border-0 outline-none" value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} />
                 <input type="email" placeholder="Email" className="mt-4 p-2 rounded-lg w-80 bg-[#ffff] border-0 outline-none" value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} />
-                <input type="password" placeholder="Senha" className="mt-4 p-2 rounded-lg w-80 bg-[#ffff] border-0 outline-none" value={form.senha} onChange={(e) => setForm({...form, senha: e.target.value})} />
+                <input type="password" placeholder="Senha" className="mt-4 p-2 rounded-lg w-80 bg-[#ffff] border-0 outline-none" value={form.password} onChange={(e) => setForm({...form, password: e.target.value})} />
             </form>
              <div className='flex gap-2 mb-2'>
                 <img src={Google} alt="" className='w-10 h-10 cursor-pointer' />

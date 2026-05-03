@@ -7,20 +7,20 @@ export function useRegister() {
       const navigate = useNavigate()
 
     const [form, setForm] = useState({
-        nome: '',
+        name: '',
         email: '',
-        senha: ''
+        password: ''
     });
 
     const handleRegister = async () => {
         try {
             await registerUser(form);
-            setForm({ nome: '', email: '', senha: '' });
+            setForm({ name: '', email: '', password: '' });
             console.log('Usuário registrado com sucesso');
             
             const loginRes = await LoginUser({
                 email: form.email,
-                senha: form.senha
+                senha: form.password
             })
 
             localStorage.setItem('token', loginRes.token)
