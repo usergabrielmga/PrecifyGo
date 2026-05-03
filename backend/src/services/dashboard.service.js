@@ -5,7 +5,7 @@ class DashboardService {
     const conn = await db.getConnection()
 
     try {
-      /* Orçamentos do mês */
+      /* 📊 Orçamentos do mês */
       const [[orcMes]] = await conn.execute(`
         SELECT COUNT(*) AS total
         FROM Dados_Orcamento
@@ -13,28 +13,30 @@ class DashboardService {
           AND YEAR(data_emissao) = YEAR(CURRENT_DATE())
       `)
 
-      /* Total em R$ do mês */
+      /* 💰 Total em R$ do mês (somente aprovados) */
       const [[totalMes]] = await conn.execute(`
-        SELECT SUM(i.quantidade * i.valor_unitario) AS total
+        SELECT COALESCE(SUM(i.quantidade * i.valor_unitario), 0) AS total
         FROM Dados_Orcamento d
         JOIN Itens_Orcamento i
           ON i.Dados_Orcamento_Numero_Orcamento = d.Numero_Orcamento
         WHERE d.status = 'Aprovado'
-        AND d.data_resposta >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
-        AND d.data_resposta < DATE_FORMAT(CURDATE() + INTERVAL 1 MONTH, '%Y-%m-01');
+          AND d.data_emissao >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
+          AND d.data_emissao < DATE_FORMAT(CURDATE() + INTERVAL 1 MONTH, '%Y-%m-01')
       `)
 
-      /* Total de orçamentos */
+      /* 📦 Total de orçamentos */
       const [[orcTotal]] = await conn.execute(`
-        SELECT COUNT(*) AS total FROM Dados_Orcamento
+        SELECT COUNT(*) AS total 
+        FROM Dados_Orcamento
       `)
 
-      /* Total de clientes */
+      /* 👤 Total de clientes */
       const [[clientes]] = await conn.execute(`
-        SELECT COUNT(*) AS total FROM Cliente
+        SELECT COUNT(*) AS total 
+        FROM Cliente
       `)
 
-      /* Status */
+      /* 📌 Status dos orçamentos */
       const [statusRows] = await conn.execute(`
         SELECT status, COUNT(*) AS total
         FROM Dados_Orcamento
@@ -50,16 +52,22 @@ class DashboardService {
       }
 
       for (const row of statusRows) {
-        status[row.status] = row.total
+        if (row.status) {
+          status[row.status] = row.total
+        }
       }
 
       return {
-        orcamentosMes: orcMes.total,
-        totalMes: totalMes.total || 0,
-        orcamentosTotal: orcTotal.total,
-        clientesTotal: clientes.total,
+        orcamentosMes: orcMes?.total || 0,
+        totalMes: totalMes?.total || 0,
+        orcamentosTotal: orcTotal?.total || 0,
+        clientesTotal: clientes?.total || 0,
         status
       }
+
+    } catch (err) {
+      console.error("🔥 ERRO DASHBOARD SERVICE:", err)
+      throw err
     } finally {
       conn.release()
     }
