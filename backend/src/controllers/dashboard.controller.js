@@ -11,7 +11,7 @@ class DashboardController {
     } catch (error) {
       console.error(error)
       return res.status(500).json({
-        error: 'Erro ao buscar dados do dashboard'
+       message: error.message || 'Erro ao buscar dados do dashboard'
       })
     } finally {
       conn.release()
