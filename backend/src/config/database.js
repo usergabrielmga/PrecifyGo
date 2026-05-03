@@ -11,5 +11,13 @@ const mysql = require('mysql2/promise');
     queueLimit: 0
   });
 
+  (async () => {
+  try {
+    const [rows] = await pool.query('SELECT 1');
+    console.log('✅ Banco conectado!');
+  } catch (err) {
+    console.error('❌ ERRO REAL:', err);
+  }
+})();
 
 module.exports = pool;
