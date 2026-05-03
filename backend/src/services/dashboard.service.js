@@ -5,7 +5,7 @@ class DashboardService {
     const conn = await db.getConnection()
 
     try {
-      /* Orçamentos do mês */
+      // Orçamentos do mês
       const [[orcMes]] = await conn.execute(`
         SELECT COUNT(*) AS total
         FROM dados_orcamento
@@ -13,28 +13,28 @@ class DashboardService {
           AND YEAR(data_emissao) = YEAR(CURRENT_DATE())
       `)
 
-      /* Total em R$ do mês */
+      // Total aprovado no mês
       const [[totalMes]] = await conn.execute(`
         SELECT SUM(i.quantidade * i.valor_unitario) AS total
         FROM dados_orcamento d
         JOIN itens_orcamento i
-          ON i.dados_orcamento_numeroOrcamento = d.Numero_Orcamento
+          ON i.dados_orcamento_numero_orcamento = d.numero_orcamento
         WHERE d.status = 'Aprovado'
-        AND d.data_resposta >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
-        AND d.data_resposta < DATE_FORMAT(CURDATE() + INTERVAL 1 MONTH, '%Y-%m-01');
+          AND d.data_emissao >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
+          AND d.data_emissao < DATE_FORMAT(CURDATE() + INTERVAL 1 MONTH, '%Y-%m-01')
       `)
 
-      /* Total de orçamentos */
+      // Total orçamentos
       const [[orcTotal]] = await conn.execute(`
         SELECT COUNT(*) AS total FROM dados_orcamento
       `)
 
-      /* Total de clientes */
+      // Clientes
       const [[clientes]] = await conn.execute(`
         SELECT COUNT(*) AS total FROM cliente
       `)
 
-      /* Status */
+      // Status
       const [statusRows] = await conn.execute(`
         SELECT status, COUNT(*) AS total
         FROM dados_orcamento
@@ -60,6 +60,7 @@ class DashboardService {
         clientesTotal: clientes.total,
         status
       }
+
     } finally {
       conn.release()
     }
