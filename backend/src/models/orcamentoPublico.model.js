@@ -10,7 +10,7 @@ class OrcamentoPublicoModel {
         data_emissao,
         status,
         observacoes
-      FROM Dados_Orcamento
+      FROM dados_orcamento
       WHERE token_publico = ?
       `,
       [token]
@@ -22,7 +22,7 @@ class OrcamentoPublicoModel {
   static async updateStatus(token, status, conn) {
     const [result] = await conn.execute(
       `
-      UPDATE Dados_Orcamento
+      UPDATE dados_orcamento
       SET status = ?, data_resposta = NOW()
       WHERE token_publico = ? AND status = 'Pendente'
       `,

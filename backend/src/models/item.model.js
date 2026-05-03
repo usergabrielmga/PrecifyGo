@@ -4,7 +4,7 @@ class ItemModel {
     console.log("Payload para o banco:", numeroOrcamento, item, conn);
     await conn.execute(
       `
-      INSERT INTO Itens_Orcamento (
+      INSERT INTO itens_orcamento (
         produto_servico,
         quantidade,
         valor_unitario,

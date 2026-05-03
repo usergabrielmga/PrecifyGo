@@ -4,7 +4,7 @@ class ClienteModel {
     console.log("Payload para o banco:", data, conn);
     const [result] = await conn.execute(
       `
-      INSERT INTO Cliente (nome, email, telefone, endereco, cpf_cnpj)
+      INSERT INTO cliente (nome, email, telefone, endereco, cpf_cnpj)
       VALUES (?, ?, ?, ?, ?)
       `,
       [nome, email, telefone, endereco, cpf_cnpj]
@@ -14,14 +14,14 @@ class ClienteModel {
   }
 
   static async getAll(conn) {
-    const [rows] = await conn.execute('SELECT * FROM Cliente')
+    const [rows] = await conn.execute('SELECT * FROM cliente')
     return rows
   }
 
    static async findByCpfCnpj(cpf_cnpj, conn) {
     if (!cpf_cnpj) return null 
     const [rows] = await conn.execute(
-      `SELECT Id_cliente FROM Cliente WHERE cpf_cnpj = ?`,
+      `SELECT Id_cliente FROM cliente WHERE cpf_cnpj = ?`,
       [cpf_cnpj]
     )
     if (rows.length > 0) return rows[0].Id_cliente
@@ -55,7 +55,7 @@ class ClienteModel {
   values.push(id)
 
   const sql = `
-    UPDATE Cliente
+    UPDATE cliente
     SET ${fields.join(', ')}
     WHERE Id_cliente = ?
   `
@@ -66,7 +66,7 @@ class ClienteModel {
 
   static async delete(id, conn) {
   const [result] = await conn.execute(
-    "DELETE FROM Cliente WHERE Id_cliente = ?",
+    "DELETE FROM cliente WHERE Id_cliente = ?",
     [id]
   );
 

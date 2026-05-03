@@ -30,7 +30,7 @@ class OrcamentoModel {
 
 const [result] = await conn.execute(
   `
-  INSERT INTO Dados_Orcamento (
+  INSERT INTO dados_orcamento (
     forma_pagamento,
     motivo_desconto,
     desconto,
@@ -62,8 +62,8 @@ const [result] = await conn.execute(
         quantidade,
         valor_unitario,
         (quantidade * valor_unitario) AS total_item
-      FROM Itens_Orcamento
-      WHERE Dados_Orcamento_Numero_Orcamento = ?
+      FROM itens_orcamento
+      WHERE dados_orcamento_numeroOrcamento = ?
       `,
       [numeroOrcamento]
     )
@@ -81,10 +81,10 @@ const [result] = await conn.execute(
         o.token_publico,
         c.nome AS cliente,
         SUM(i.quantidade * i.valor_unitario) AS total
-      FROM Dados_Orcamento o
-      JOIN Cliente c ON c.Id_cliente = o.Cliente_Id_cliente
-      JOIN Itens_Orcamento i 
-        ON i.Dados_Orcamento_Numero_Orcamento = o.Numero_Orcamento
+      FROM dados_orcamento o
+      JOIN cliente c ON c.Id_cliente = o.Cliente_Id_cliente
+      JOIN itens_orcamento i 
+        ON i.dados_orcamento_numeroOrcamento = o.Numero_Orcamento
       GROUP BY o.Numero_Orcamento
       ORDER BY o.Numero_Orcamento DESC
     `)
@@ -128,8 +128,8 @@ const [result] = await conn.execute(
       quantidade,
       valor_unitario,
       (quantidade * valor_unitario) AS total_item
-    FROM Itens_Orcamento
-    WHERE Dados_Orcamento_Numero_Orcamento = ?
+    FROM itens_orcamento
+    WHERE dados_orcamento_numeroOrcamento = ?
   `, [numeroOrcamento])
 
   const total = items.reduce((sum, i) => sum + Number(i.total_item), 0)
