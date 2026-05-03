@@ -1,20 +1,11 @@
-const db = require('../config/database')
-
 class ClienteModel {
-
-  // CREATE
   static async create(data, conn, userId) {
     const { nome, email, telefone, endereco, cpf_cnpj } = data
 
     const [result] = await conn.execute(
       `
       INSERT INTO cliente (
-        nome,
-        email,
-        telefone,
-        endereco,
-        cpf_cnpj,
-        user_id
+        nome, email, telefone, endereco, cpf_cnpj, user_id
       )
       VALUES (?, ?, ?, ?, ?, ?)
       `,
@@ -24,18 +15,10 @@ class ClienteModel {
     return result.insertId
   }
 
-  // GET ALL (SÓ DO USUÁRIO)
   static async getAll(conn, userId) {
     const [rows] = await conn.execute(
       `
-      SELECT 
-        Id_cliente,
-        nome,
-        email,
-        telefone,
-        endereco,
-        cpf_cnpj
-      FROM cliente
+      SELECT * FROM cliente
       WHERE user_id = ?
       `,
       [userId]
@@ -44,10 +27,7 @@ class ClienteModel {
     return rows
   }
 
-  // FIND BY CPF dentro do usuário
   static async findByCpfCnpj(cpf_cnpj, conn, userId) {
-    if (!cpf_cnpj) return null
-
     const [rows] = await conn.execute(
       `
       SELECT Id_cliente 
@@ -57,57 +37,42 @@ class ClienteModel {
       [cpf_cnpj, userId]
     )
 
-    return rows.length > 0 ? rows[0].Id_cliente : null
+    return rows[0]?.Id_cliente || null
   }
 
-  // EDIT
   static async edit(id, data, conn, userId) {
-    const allowedFields = [
-      'nome',
-      'email',
-      'telefone',
-      'endereco',
-      'cpf_cnpj'
-    ]
-
     const fields = []
     const values = []
 
-    for (const field of allowedFields) {
+    const allowed = ['nome', 'email', 'telefone', 'endereco', 'cpf_cnpj']
+
+    for (const field of allowed) {
       if (data[field] !== undefined) {
         fields.push(`${field} = ?`)
         values.push(data[field])
       }
     }
 
-    if (fields.length === 0) {
-      throw new Error('Nenhum campo válido para atualização')
-    }
-
     values.push(id, userId)
 
-    const sql = `
+    await conn.execute(
+      `
       UPDATE cliente
       SET ${fields.join(', ')}
       WHERE Id_cliente = ? AND user_id = ?
-    `
-
-    await conn.execute(sql, values)
+      `,
+      values
+    )
   }
 
-  // DELETE
   static async delete(id, conn, userId) {
-    const [result] = await conn.execute(
+    await conn.execute(
       `
-      DELETE FROM cliente
+      DELETE FROM cliente 
       WHERE Id_cliente = ? AND user_id = ?
       `,
       [id, userId]
     )
-
-    if (result.affectedRows === 0) {
-      throw new Error("Cliente não encontrado ou não pertence ao usuário")
-    }
   }
 }
 
