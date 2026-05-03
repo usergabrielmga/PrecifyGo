@@ -9,7 +9,7 @@ export default function Register() {
   
     
     const { form, setForm, handleRegister } = useRegister()
-    console.log(form)
+    console.log("FORM:", form)
 
 
     return (
