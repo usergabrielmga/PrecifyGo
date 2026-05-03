@@ -4,9 +4,13 @@ const UserModel = require('../models/user.model')
 
 class AuthController {
   static async register(request, reply) {
+  try {
     const result = await AuthService.register(request.body)
     return reply.code(201).send(result)
+  } catch (error) {
+    return reply.code(400).send({ message: error.message })
   }
+}
 
   static async login(request, reply) {
     const user = await AuthService.login(request.body)

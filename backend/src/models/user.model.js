@@ -1,17 +1,17 @@
 const db = require('../config/database')
 
-exports.createLocal = async ({ nome, email, senha }) => {
+exports.createLocal = async ({ name, email, password }) => {
   const [result] = await db.execute(
-    'INSERT INTO users (nome, email, senha, provider) VALUES (?, ?, ?, ?)',
-    [nome, email, senha, 'local']
+    'INSERT INTO users (name, email, password, provider) VALUES (?, ?, ?, ?)',
+    [name, email, password, 'local']
   )
   return result.insertId
 }
 
-exports.createGoogle = async ({ nome, email, googleId }) => {
+exports.createGoogle = async ({ name, email, googleId }) => {
   const [result] = await db.execute(
-    'INSERT INTO users (nome, email, google_id, provider) VALUES (?, ?, ?, ?)',
-    [nome ?? null, email, googleId, 'google']
+    'INSERT INTO users (name, email, google_id, provider) VALUES (?, ?, ?, ?)',
+    [name ?? null, email, googleId, 'google']
   )
   return result.insertId
 }
