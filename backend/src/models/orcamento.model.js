@@ -115,7 +115,7 @@ const [result] = await conn.execute(
       e.LogoTipo AS emissor_logo
 
     FROM Dados_Orcamento o
-    JOIN Emissor e ON e.Id_emissor = o.Emissor_Id_emissor
+    JOIN emissor e ON e.Id_emissor = o.emissor_Id_emissor
     JOIN Cliente c ON c.Id_cliente = o.Cliente_Id_cliente
     WHERE o.Numero_Orcamento = ?
   `, [numeroOrcamento])

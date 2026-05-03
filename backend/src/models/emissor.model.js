@@ -4,7 +4,7 @@ class EmissorModel {
     console.log("Payload para o banco:", data, conn);
     const [result] = await conn.execute(
       `
-      INSERT INTO Emissor (nome, email, telefone, endereco, cpf_cnpj, LogoTipo)
+      INSERT INTO emissor (nome, email, telefone, endereco, cpf_cnpj, LogoTipo)
       VALUES (?, ?, ?, ?, ?, ?)
       `,
       [
