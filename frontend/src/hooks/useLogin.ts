@@ -12,7 +12,7 @@ export function useLogin() {
         password: ''
     });
 
-    const handleRegister = async () => {
+    const handleLogin = async () => {
 
         try {
             const res = await LoginUser({ email: form.email, password: form.password });
@@ -45,5 +45,5 @@ export function useLogin() {
     }
     });
 
-    return { form, setForm, handleRegister, googleLogin }
+    return { form, setForm, handleLogin, googleLogin }
 }
