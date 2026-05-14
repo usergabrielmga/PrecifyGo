@@ -18,8 +18,8 @@ export function useLogin() {
             const res = await LoginUser({ email: form.email, password: form.password });
             setForm({email: '', password: '' });
             localStorage.setItem('token', res.token);
+            console.log('TOKEN:', localStorage.getItem('token'));
 
-            
             console.log('Usuário logado com sucesso');
             navigate('/dashboard');
 

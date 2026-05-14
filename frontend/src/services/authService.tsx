@@ -1,7 +1,7 @@
 
 import { type LoginResponse, type RegisterResponse, type User } from '../types/user';
 
-const backend = import.meta.env.VITE_BACKEND_URL;
+const backend = 'http://localhost:3000';
 
 export const registerUser = async (
   userData: Omit<User, 'id'>

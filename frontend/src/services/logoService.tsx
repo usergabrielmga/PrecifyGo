@@ -1,4 +1,4 @@
-const backend = import.meta.env.VITE_BACKEND_URL;
+const backend = 'http://localhost:3000';
 
 export async function uploadLogo(file: File) {
   const formData = new FormData()

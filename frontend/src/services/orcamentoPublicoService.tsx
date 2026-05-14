@@ -1,6 +1,6 @@
 import type { OrcamentoPublico } from "../types/orcamentoPublico"
 
-const backend = import.meta.env.VITE_BACKEND_URL;
+const backend = 'http://localhost:3000';
 
 export async function getOrcamentoPublico(token: string): Promise<OrcamentoPublico> {
   const response = await fetch(`${backend}/orcamento/publico/${token}`)

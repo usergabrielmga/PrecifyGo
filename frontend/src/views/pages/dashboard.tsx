@@ -28,6 +28,7 @@ export default function Dashboard() {
       try {
         const response = await getDashboardData()
         setDashboard(response)
+        
       } catch (error) {
         console.error("Erro ao carregar dashboard:", error)
       }

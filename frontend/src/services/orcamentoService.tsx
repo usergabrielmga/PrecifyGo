@@ -1,13 +1,15 @@
 import type { OrcamentoFormData } from "../schemas/orcamento.schema";
 
-const backend = import.meta.env.VITE_BACKEND_URL;
+const backend = 'http://localhost:3000';
 
 export async function createOrcamento(data: OrcamentoFormData) {
-  console.log("Dados enviados para o backend:", JSON.stringify(data, null, 2));
+  const token = localStorage.getItem("token");
+
   const response = await fetch(`${backend}/orcamentos`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
     },
     body: JSON.stringify(data),
   });
@@ -23,8 +25,13 @@ export async function createOrcamento(data: OrcamentoFormData) {
 
 
 export async function getOrcamentos() {
+  const token = localStorage.getItem("token");
+
   const response = await fetch(`${backend}/orcamentos`, {
     method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
   });
 
   if (!response.ok) {
@@ -36,19 +43,19 @@ export async function getOrcamentos() {
   return response.json();
 }
 
-
 export async function getOrcamentoPdf(id: number) {
-  const response = await fetch(
-    `${backend}/orcamentos/${id}/pdf`,
-    {
-      method: "GET",
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${backend}/orcamentos/${id}/pdf`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`
     }
-  );
+  });
 
   if (!response.ok) {
     throw new Error("Erro ao gerar PDF");
   }
 
-  const blob = await response.blob();
-  return blob;
+  return await response.blob();
 }

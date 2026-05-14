@@ -5,6 +5,7 @@ export interface User {
 }
 
 export type LoginResponse = {
+  data: any;
   token: string
 }
 

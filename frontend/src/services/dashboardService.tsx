@@ -1,14 +1,18 @@
- // Adjust the import path as needed
-
- const backend = import.meta.env.VITE_BACKEND_URL;
+const backend = 'http://localhost:3000';
 
 export async function getDashboardData() {
-  const response = await fetch(`${backend}/dashboard`) // GET, sem body
+  const token = localStorage.getItem("token"); 
+
+  const response = await fetch(`${backend}/dashboard`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
 
   if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(errorText)
+    const errorText = await response.text();
+    throw new Error(errorText);
   }
 
-  return response.json()
+  return response.json();
 }
