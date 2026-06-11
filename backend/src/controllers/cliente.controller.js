@@ -2,8 +2,9 @@ const ClientesService = require('../services/clientes.service')
 
 class ClienteController {
   static async create(request, reply) {
+    const usuarioId = request.user.id;
   try {
-    const clienteId = await ClientesService.createCliente(request.body)
+    const clienteId = await ClientesService.createCliente(request.body, usuarioId)
     return reply.code(201).send({ clienteId })
   } catch (error) {
     return reply.code(400).send({ error: error.message })
@@ -11,8 +12,9 @@ class ClienteController {
 }
 
   static async getAll(request, reply) {
+    const usuarioId = request.user.id;
     try {
-      const result = await ClientesService.getAll()
+      const result = await ClientesService.getAll(usuarioId)
       return reply.code(200).send(result)
     } catch (error) {
       return reply.code(400).send({ error: error.message })
@@ -20,6 +22,7 @@ class ClienteController {
   }
 
   static async edit(request, reply) {
+    const usuarioId = request.user.id;
     try {
       const { id } = request.params
       const data = request.body
@@ -30,7 +33,7 @@ class ClienteController {
           .send({ error: 'Nenhum dado enviado para atualização' })
       }
 
-      await ClientesService.edit(id, data)
+      await ClientesService.edit(id, data, usuarioId)
 
       return reply.code(200).send({
         message: 'Cliente atualizado com sucesso'
@@ -41,19 +44,29 @@ class ClienteController {
   }
 
   static async delete(request, reply) {
-  try {
-    const { id } = request.params;
-    await ClientesService.delete(Number(id));
-    return reply.code(204).send();
-  } catch (error) {
-    if (error.message.includes('foreign key')) {
-      return reply.code(409).send({
-        error: 'Não é possível excluir o cliente porque ele possui orçamentos vinculados.'
-      });
-    }
+    const usuarioId = request.user.id;
+    try {
+      const { id } = request.params;
+      await ClientesService.delete(Number(id), usuarioId);
+      return reply.code(204).send();
+    } catch (error) {
 
-    return reply.code(400).send({ error: error.message });
+  if (
+    error.message ===
+    'CLIENTE_COM_ORCAMENTOS'
+  ) {
+    return reply.code(409).send({
+      error:
+        'Não é possível excluir o cliente porque ele possui orçamentos vinculados.'
+    })
   }
+
+  return reply.code(400).send({
+    error: error.message
+  })
+}
+
+  
 }
 
 }

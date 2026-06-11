@@ -6,6 +6,7 @@ const start = async () => {
       port: process.env.PORT || 3000,
       host: '0.0.0.0' 
     })
+  
 
     console.log('Server rodando com sucesso!')
   } catch (err) {

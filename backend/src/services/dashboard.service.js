@@ -1,45 +1,79 @@
 const db = require('../config/database')
 
 class DashboardService {
-  static async getMetrics() {
-    const conn = await db.getConnection()
+  static async getMetrics(usuarioId) {
 
     try {
-      // Orçamentos do mês
-      const [[orcMes]] = await conn.execute(`
+
+      const orcMesResult = await db.query(
+        `
         SELECT COUNT(*) AS total
         FROM dados_orcamento
-        WHERE MONTH(data_emissao) = MONTH(CURRENT_DATE())
-          AND YEAR(data_emissao) = YEAR(CURRENT_DATE())
-      `)
+        WHERE usuario_id = $1
+          AND DATE_TRUNC('month', data_emissao)
+              = DATE_TRUNC('month', CURRENT_DATE)
+        `,
+        [usuarioId]
+      )
 
-      // Total aprovado no mês
-      const [[totalMes]] = await conn.execute(`
-        SELECT SUM(i.quantidade * i.valor_unitario) AS total
+      const orcMes = orcMesResult.rows[0]
+
+      const totalMesResult = await db.query(
+        `
+        SELECT COALESCE(
+          SUM(i.quantidade * i.valor_unitario),
+          0
+        ) AS total
+
         FROM dados_orcamento d
+
         JOIN itens_orcamento i
-          ON i.dados_orcamento_numero_orcamento = d.numero_orcamento
-        WHERE d.status = 'Aprovado'
-          AND d.data_emissao >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
-          AND d.data_emissao < DATE_FORMAT(CURDATE() + INTERVAL 1 MONTH, '%Y-%m-01')
-      `)
+          ON i.dados_orcamento_numero_orcamento =
+             d.numero_orcamento
 
-      // Total orçamentos
-      const [[orcTotal]] = await conn.execute(`
-        SELECT COUNT(*) AS total FROM dados_orcamento
-      `)
+        WHERE d.usuario_id = $1
+          AND d.status = 'Aprovado'
+          AND DATE_TRUNC('month', d.data_emissao)
+              = DATE_TRUNC('month', CURRENT_DATE)
+        `,
+        [usuarioId]
+      )
 
-      // Clientes
-      const [[clientes]] = await conn.execute(`
-        SELECT COUNT(*) AS total FROM cliente
-      `)
+      const totalMes = totalMesResult.rows[0]
 
-      // Status
-      const [statusRows] = await conn.execute(`
+      const orcTotalResult = await db.query(
+        `
+        SELECT COUNT(*) AS total
+        FROM dados_orcamento
+        WHERE usuario_id = $1
+        `,
+        [usuarioId]
+      )
+
+      const orcTotal = orcTotalResult.rows[0]
+
+      const clientesResult = await db.query(
+        `
+        SELECT COUNT(DISTINCT Cliente_Id_cliente) AS total
+        FROM dados_orcamento
+        WHERE usuario_id = $1
+        `,
+        [usuarioId]
+      )
+
+      const clientes = clientesResult.rows[0]
+
+      const statusResult = await db.query(
+        `
         SELECT status, COUNT(*) AS total
         FROM dados_orcamento
+        WHERE usuario_id = $1
         GROUP BY status
-      `)
+        `,
+        [usuarioId]
+      )
+
+      const statusRows = statusResult.rows
 
       const status = {
         Enviado: 0,
@@ -50,19 +84,20 @@ class DashboardService {
       }
 
       for (const row of statusRows) {
-        status[row.status] = row.total
+        status[row.status] = Number(row.total)
       }
 
       return {
-        orcamentosMes: orcMes.total,
-        totalMes: totalMes.total || 0,
-        orcamentosTotal: orcTotal.total,
-        clientesTotal: clientes.total,
+        orcamentosMes: Number(orcMes.total),
+        totalMes: Number(totalMes.total),
+        orcamentosTotal: Number(orcTotal.total),
+        clientesTotal: Number(clientes.total),
         status
       }
 
-    } finally {
-      conn.release()
+    } catch (error) {
+      console.error('ERRO REAL DASHBOARD:', error)
+      throw error
     }
   }
 }

@@ -4,7 +4,7 @@ const OrcamentoPublicoModel = require('../models/orcamentoPublico.model')
 class OrcamentoPublicoService {
 
   static async getByToken(token) {
-    const conn = await db.getConnection()
+    const conn = await db.connect()
 
     try {
       const orcamento = await OrcamentoPublicoModel.findByToken(token, conn)
@@ -24,7 +24,7 @@ class OrcamentoPublicoService {
       throw new Error('Status inválido')
     }
 
-    const conn = await db.getConnection()
+    const conn = await db.connect()
 
     try {
       const updated = await OrcamentoPublicoModel.updateStatus(

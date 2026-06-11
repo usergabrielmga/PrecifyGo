@@ -1,80 +1,78 @@
 class OrcamentoModel {
-  static async create(data, conn) {
-    const normalize = v => (v === undefined ? null : v)
+  static async create(data, conn, usuarioId) {
 
-    const payload = {
-      forma_pagamento: normalize(data.formaPagamento),
-      motivo_desconto: normalize(data.motivoDesconto),
-      desconto: Number.isFinite(data.desconto) ? data.desconto : 0,
-      motivo_acrescimo: normalize(data.motivoAcrescimo),
-      acrescimo: Number.isFinite(data.acrescimo) ? data.acrescimo : 0,
-      validade: normalize(data.dataValidade),
-      observacoes: normalize(data.observacoes),
-      token_publico: data.tokenPublico,
-      Emissor_Id_emissor: data.Emissor_Id_emissor,
-      Cliente_Id_cliente: data.Cliente_Id_cliente,
-    }
+    const normalize = v =>
+      v === undefined || v === '' ? null : v
 
-   const params = [
-    payload.forma_pagamento,
-    payload.motivo_desconto,
-    payload.desconto,
-    payload.motivo_acrescimo,
-    payload.acrescimo,
-    payload.validade,
-    payload.observacoes,
-    payload.token_publico, 
-    payload.Emissor_Id_emissor,
-    payload.Cliente_Id_cliente
-  ]
+    const result = await conn.query(
+      `
+      INSERT INTO dados_orcamento (
+        forma_pagamento,
+        motivo_desconto,
+        desconto,
+        motivo_acrescimo,
+        acrescimo,
+        validade,
+        data_emissao,
+        status,
+        observacoes,
+        token_publico,
+        emissor_id_emissor,
+        cliente_id_cliente,
+        usuario_id
+      )
+      VALUES (
+        $1, $2, $3, $4, $5, $6,
+        NOW(),
+        'Pendente',
+        $7, $8, $9, $10, $11
+      )
+      RETURNING numero_orcamento
+      `,
+      [
+        normalize(data.formaPagamento),
+        normalize(data.motivoDesconto),
+        Number(data.desconto) || 0,
+        normalize(data.motivoAcrescimo),
+        Number(data.acrescimo) || 0,
+        normalize(data.dataValidade),
+        normalize(data.observacoes),
+        data.tokenPublico,
+        data.Emissor_Id_emissor,
+        data.Cliente_Id_cliente,
+        usuarioId
+      ]
+    )
 
-const [result] = await conn.execute(
-  `
-  INSERT INTO dados_orcamento (
-    forma_pagamento,
-    motivo_desconto,
-    desconto,
-    motivo_acrescimo,
-    acrescimo,
-    validade,
-    data_emissao,
-    status,
-    observacoes,
-    token_publico,
-    Emissor_Id_emissor,
-    Cliente_Id_cliente
-  ) VALUES (?, ?, ?, ?, ?, ?, NOW(), 'Pendente', ?, ?, ?, ?)
-  `,
-  params
-)
-
-    return result.insertId
+    console.log('ROWS:', result.rows)
+    return result.rows[0].numero_orcamento
   }
 
-
-
   static async findById(numeroOrcamento, conn) {
-    const [rows] = await conn.execute(
+
+    const result = await conn.query(
       `
-      SELECT 
-        IdItens_Orcamento,
+      SELECT
+        id_itens_orcamento,
         produto_servico,
         quantidade,
         valor_unitario,
         (quantidade * valor_unitario) AS total_item
       FROM itens_orcamento
-      WHERE dados_orcamento_numeroOrcamento = ?
+      WHERE dados_orcamento_numero_orcamento = $1
       `,
       [numeroOrcamento]
     )
 
-    return rows
+    return result.rows
   }
 
-  static async findAllForModal(conn) {
-    const [rows] = await conn.execute(`
+  static async findAllForModal(conn, usuarioId) {
+
+    const result = await conn.query(
+      `
       SELECT
-        o.Numero_Orcamento,
+        o.numero_orcamento,
         o.status,
         o.data_emissao,
         o.validade,
@@ -82,64 +80,85 @@ const [result] = await conn.execute(
         c.nome AS cliente,
         SUM(i.quantidade * i.valor_unitario) AS total
       FROM dados_orcamento o
-      JOIN cliente c ON c.Id_cliente = o.Cliente_Id_cliente
-      JOIN itens_orcamento i 
-        ON i.dados_orcamento_numeroOrcamento = o.Numero_Orcamento
-      GROUP BY o.Numero_Orcamento
-      ORDER BY o.Numero_Orcamento DESC
-    `)
+      JOIN cliente c
+        ON c.id_cliente = o.cliente_id_cliente
+      JOIN itens_orcamento i
+        ON i.dados_orcamento_numero_orcamento = o.numero_orcamento
+      WHERE o.usuario_id = $1
+      GROUP BY o.numero_orcamento, c.nome
+      ORDER BY o.numero_orcamento DESC
+      `,
+      [usuarioId]
+    )
 
-    return rows
+    return result.rows
   }
 
   static async findCompleteById(numeroOrcamento, conn) {
-  const [[budget]] = await conn.execute(`
-    SELECT 
-      o.Numero_Orcamento,
-      o.forma_pagamento,
-      o.desconto,
-      o.acrescimo,
-      o.validade,
-      o.token_publico,
-      o.data_emissao,
-      o.status,
-      o.observacoes,
 
-      e.nome  AS emissor_nome,
-      e.email AS emissor_email,
-      e.telefone AS emissor_telefone,
+    const budgetResult = await conn.query(
+      `
+      SELECT
+        o.numero_orcamento AS numero_orcamento,
+        o.forma_pagamento,
+        o.desconto,
+        o.acrescimo,
+        o.validade,
+        o.token_publico,
+        o.data_emissao,
+        o.status,
+        o.observacoes,
 
-      c.nome  AS cliente_nome,
-      c.email AS cliente_email,
-      c.telefone AS cliente_telefone,
-      e.LogoTipo AS emissor_logo
+        e.nome AS emissor_nome,
+        e.email AS emissor_email,
+        e.telefone AS emissor_telefone,
 
-    FROM Dados_Orcamento o
-    JOIN emissor e ON e.Id_emissor = o.emissor_Id_emissor
-    JOIN Cliente c ON c.Id_cliente = o.Cliente_Id_cliente
-    WHERE o.Numero_Orcamento = ?
-  `, [numeroOrcamento])
+        c.nome AS cliente_nome,
+        c.email AS cliente_email,
+        c.telefone AS cliente_telefone,
 
-  if (!budget) return null
+        e.logotipo AS emissor_logo
 
-  const [items] = await conn.execute(`
-    SELECT 
-      produto_servico,
-      quantidade,
-      valor_unitario,
-      (quantidade * valor_unitario) AS total_item
-    FROM itens_orcamento
-    WHERE dados_orcamento_numeroOrcamento = ?
-  `, [numeroOrcamento])
+      FROM dados_orcamento o
+      JOIN emissor e
+        ON e.id_emissor = o.emissor_id_emissor
+      JOIN cliente c
+        ON c.id_cliente = o.cliente_id_cliente
+      WHERE o.numero_orcamento = $1
+      `,
+      [numeroOrcamento]
+    )
 
-  const total = items.reduce((sum, i) => sum + Number(i.total_item), 0)
+    const budget = budgetResult.rows[0]
 
-  return { budget, items, total }
+    if (!budget) return null
+
+    const itemsResult = await conn.query(
+      `
+      SELECT
+        produto_servico,
+        quantidade,
+        valor_unitario,
+        (quantidade * valor_unitario) AS total_item
+      FROM itens_orcamento
+      WHERE dados_orcamento_numero_orcamento = $1
+      `,
+      [numeroOrcamento]
+    )
+
+    const items = itemsResult.rows
+
+    const total = items.reduce(
+      (sum, i) => sum + Number(i.total_item),
+      0
+    )
+
+    return {
+      budget,
+      items,
+      total
+    }
+  }
 }
-
-
-
-}
-
 
 module.exports = OrcamentoModel

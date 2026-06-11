@@ -1,4 +1,4 @@
-const db = require('../config/database')
+const pool = require('../config/database')
 const ClienteModel = require('../models/cliente.model')
 const OrcamentoModel = require('../models/orcamento.model')
 const ItemModel = require('../models/item.model')
@@ -7,16 +7,17 @@ const fs = require('fs')
 const path = require('path')
 const puppeteer = require('puppeteer')
 const crypto = require('crypto')
+const { Pool } = require('pg')
 
 
 class OrcamentoService {
-  static async create(data) {
+  static async create(data, usuarioId) {
     if (!data) throw new Error('Body vazio')
 
-    const conn = await db.getConnection()
+      const client = await pool.connect()
 
     try {
-      await conn.beginTransaction()
+      await client.query('BEGIN')
 
       /* ================= EMISSOR ================= */
       const emissorData = {
@@ -28,7 +29,7 @@ class OrcamentoService {
         LogoTipo: data.logo ?? null,
       }
 
-      const emissorId = await EmissorModel.create(emissorData, conn)
+      const emissorId = await EmissorModel.create(emissorData, client, usuarioId)
 
       /* ================= CLIENTE ================= */
      const clienteData = {
@@ -41,21 +42,20 @@ class OrcamentoService {
       email: data.emailClient?.trim(),
     }
 
-    let clienteId
+    
+    let clienteId = await ClienteModel.findByCpfCnpj(
+    clienteData.cpf_cnpj,
+    client,
+    usuarioId
+  )
 
-    try {
-      // Tenta criar o cliente
-      clienteId = await ClienteModel.create(clienteData, conn)
-    } catch (error) {
-      // Se for erro de duplicidade, pega o ID existente
-      if (error.code === "ER_DUP_ENTRY") {
-        const existingId = await ClienteModel.findByCpfCnpj(clienteData.cpf_cnpj, conn)
-        if (!existingId) throw new Error("Erro ao recuperar cliente existente")
-        clienteId = existingId
-      } else {
-        throw error
-      }
-    }
+  if (!clienteId) {
+    clienteId = await ClienteModel.create(
+      clienteData,
+      client,
+      usuarioId
+    )
+  }
 
     console.log("Cliente ID final:", clienteId)
       const tokenPublico = crypto.randomBytes(32).toString('hex')
@@ -74,8 +74,9 @@ class OrcamentoService {
         Cliente_Id_cliente: clienteId,
         tokenPublico
       }
+      
 
-      const numeroOrcamento = await OrcamentoModel.create(orcamentoData, conn)
+      const numeroOrcamento = await OrcamentoModel.create(orcamentoData, client, usuarioId)
 
       /* ================= ITENS ================= */
       if (!Array.isArray(data.itens) || data.itens.length === 0) {
@@ -90,44 +91,43 @@ class OrcamentoService {
             quantidade: Number(item.quantidade) || 1,
             valor_unitario: Number(item.valorUnitario) || 0,
           },
-          conn
+          client
         )
       }
 
-      await conn.commit()
+      await client.query('COMMIT')
 
       return {
         clienteId,
         emissorId,
-        numeroOrcamento,
+        numero_orcamento: numeroOrcamento,
         tokenPublico
       }
 
 
 
     } catch (error) {
-      await conn.rollback()
+      await client.query('ROLLBACK')
       throw error
     } finally {
-      conn.release()
-      
+      client.release()
     }
   }
 
-  static async getAll() {
-    const conn = await db.getConnection()
+  static async getAll(usuarioId) {
+    const client = await pool.connect()
     try {
-      return await OrcamentoModel.findAllForModal(conn)
+      return await OrcamentoModel.findAllForModal(client, usuarioId)
     } finally {
-      conn.release()
+      client.release()
     }
   }
 
   static async getById(id) {
-  const conn = await db.getConnection()
+  const client = await pool.connect()
 
   try {
-    const data = await OrcamentoModel.findCompleteById(id, conn)
+    const data = await OrcamentoModel.findCompleteById(id, client)
 
     if (!data) {
       throw new Error('Budget not found')
@@ -135,7 +135,7 @@ class OrcamentoService {
 
     return data
   } finally {
-    conn.release()
+    client.release()
   }
 }
 
@@ -162,7 +162,7 @@ class OrcamentoService {
 
   html = html
     .replace('{{logo}}', budget.emissor_logo || '')
-    .replace('{{numero}}', budget.Numero_Orcamento)
+    .replace('{{numero_orcamento}}', budget.numero_orcamento)
     .replace('{{emissor_nome}}', budget.emissor_nome)
     .replace('{{emissor_email}}', budget.emissor_email)
     .replace('{{emissor_telefone}}', budget.emissor_telefone)

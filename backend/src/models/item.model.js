@@ -1,17 +1,27 @@
 class ItemModel {
   static async create(numeroOrcamento, item, conn) {
-    const { produto_servico, quantidade, valor_unitario } = item
-    console.log("Payload para o banco:", numeroOrcamento, item, conn);
-    await conn.execute(
+    const {
+      produto_servico,
+      quantidade,
+      valor_unitario
+    } = item
+
+    await conn.query(
       `
       INSERT INTO itens_orcamento (
         produto_servico,
         quantidade,
         valor_unitario,
-        Dados_Orcamento_Numero_Orcamento
-      ) VALUES (?, ?, ?, ?)
+        dados_orcamento_numero_orcamento
+      )
+      VALUES ($1, $2, $3, $4)
       `,
-      [produto_servico, quantidade, valor_unitario, numeroOrcamento]
+      [
+        produto_servico,
+        quantidade,
+        valor_unitario,
+        numeroOrcamento
+      ]
     )
   }
 }

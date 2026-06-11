@@ -1,13 +1,14 @@
 const db = require('../config/database')
+const { Pool } = require('pg')
 const ClienteModel = require('../models/cliente.model')
 
 class ClientesService {
-  static async createCliente(data) {
+  static async createCliente(data, usuarioId) {
   if (!data.nome || !data.email || !data.telefone) {
     throw new Error("Campos obrigatórios não preenchidos")
   }
 
-  const conn = await db.getConnection()
+  const conn = await db.connect()
 
   try {
     const clienteId = await ClienteModel.create(
@@ -18,7 +19,8 @@ class ClientesService {
         endereco: data.endereco ?? null,
         cpf_cnpj: data.cpf_cnpj ?? null,
       },
-      conn
+      conn,
+      usuarioId
     )
 
     return clienteId
@@ -35,28 +37,30 @@ class ClientesService {
 
 
 
-  static async getAll() {
-    const conn = await db.getConnection()
+  static async getAll(usuarioId) {
+    const conn = await db.connect()
     try {
-      return await ClienteModel.getAll(conn)
+      return await ClienteModel.getAll(conn , usuarioId)
     } finally {
       conn.release()
     }
   }
 
-  static async edit(id, data) {
-    const conn = await db.getConnection()
+  static async edit(id, data, usuarioId) {
+    const conn = await db.connect()
     try {
-      await ClienteModel.edit(id, data, conn)
+      await ClienteModel.edit(id, data, conn, usuarioId)
     } finally {
       conn.release()
     }
   }
 
-  static async delete(id) {
-  const conn = await db.getConnection();
+
+
+  static async delete(id, usuarioId) {
+  const conn = await db.connect()
   try {
-    return await ClienteModel.delete(id, conn);
+    return await ClienteModel.delete(id, conn, usuarioId);
   } finally {
     conn.release();
   }

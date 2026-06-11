@@ -1,24 +1,24 @@
-const mysql = require('mysql2/promise');
+require('dotenv').config()
 
- const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
+const { Pool } = require('pg')
 
-  (async () => {
+const isProduction = process.env.NODE_ENV === 'production'
+
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL_SHINKANSEN,
+  ssl: isProduction
+    ? { rejectUnauthorized: false }
+    : false
+})
+
+;(async () => {
   try {
-    const [rows] = await pool.query('SELECT 1');
-    console.log('✅ Banco conectado!');
+    await pool.query('SELECT 1')
+    console.log('✅ Banco conectado!')
   } catch (err) {
-    console.error('❌ ERRO REAL:', err);
+    console.error('❌ ERRO REAL:', err)
   }
-})();
-  
+})()
 
-module.exports = pool;
+module.exports = pool

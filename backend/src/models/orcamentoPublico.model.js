@@ -1,37 +1,40 @@
 class OrcamentoPublicoModel {
 
   static async findByToken(token, conn) {
-    const [rows] = await conn.execute(
+
+    const result = await conn.query(
       `
       SELECT
-        Numero_Orcamento,
+        numero_orcamento,
         forma_pagamento,
         validade,
         data_emissao,
         status,
         observacoes
       FROM dados_orcamento
-      WHERE token_publico = ?
+      WHERE token_publico = $1
       `,
       [token]
     )
 
-    return rows[0] || null
+    return result.rows[0] || null
   }
 
   static async updateStatus(token, status, conn) {
-    const [result] = await conn.execute(
+
+    const result = await conn.query(
       `
       UPDATE dados_orcamento
-      SET status = ?, data_resposta = NOW()
-      WHERE token_publico = ? AND status = 'Pendente'
+      SET status = $1,
+          data_resposta = NOW()
+      WHERE token_publico = $2
+      AND status = 'Pendente'
       `,
       [status, token]
     )
 
-    return result.affectedRows
+    return result.rowCount
   }
-
 }
 
 module.exports = OrcamentoPublicoModel

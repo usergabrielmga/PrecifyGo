@@ -2,9 +2,13 @@ const OrcamentoService = require('../services/orcamento.service')
 
 class OrcamentoController {
   static async create(request, reply) {
+
+    const usuarioId = request.user.id;
+
+
       console.log('Dados recebidos no controller:', request.body);
     try {
-      const result = await OrcamentoService.create(request.body)
+      const result = await OrcamentoService.create(request.body, usuarioId)
       return reply.code(201).send(result)
     } catch (error) {
       return reply.code(400).send({ error: error.message })
@@ -13,8 +17,11 @@ class OrcamentoController {
 
   
   static async getAll(request, reply) {
+
+    const usuarioId = request.user.id;  
+
     try {
-      const orcamentos = await OrcamentoService.getAll()
+      const orcamentos = await OrcamentoService.getAll(usuarioId)
       return reply.send(orcamentos)
     } catch (error) {
       console.error(error)
@@ -46,18 +53,21 @@ class OrcamentoController {
   }
 }
 
-  static async pdf(request, reply) {
+static async pdf(request, reply) {
   try {
     const { id } = request.params
 
-    const pdfBuffer = await OrcamentoService.generatePdf(id)
+    if (!id || id === 'undefined') {
+      return reply.code(400).send({
+        error: 'ID inválido'
+      })
+    }
+
+    const pdfBuffer = await OrcamentoService.generatePdf(Number(id))
 
     reply
       .header('Content-Type', 'application/pdf')
-      .header(
-        'Content-Disposition',
-        `attachment; filename=orcamento-${id}.pdf`
-      )
+      .header('Content-Disposition', `attachment; filename=orcamento-${id}.pdf`)
       .send(pdfBuffer)
 
   } catch (error) {
@@ -68,7 +78,14 @@ class OrcamentoController {
 static async viewPdf(request, reply) {
   try {
     const { id } = request.params
-    const pdfBuffer = await OrcamentoService.generatePdf(id)
+
+    if (!id || id === 'undefined') {
+      return reply.code(400).send({
+        error: 'ID do orçamento inválido'
+      })
+    }
+    
+    const pdfBuffer = await OrcamentoService.generatePdf(Number(id))
 
     
     reply

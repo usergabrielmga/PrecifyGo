@@ -1,8 +1,8 @@
 const db = require("../config/database");
 
 exports.updateLogo = async (logoUrl) => {
-  await db.execute(
-    `UPDATE emissor SET LogoTipo = ? WHERE Id_emissor = 1`,
+  await db.query(
+    `UPDATE emissor SET logotipo = $1 WHERE id_emissor = 1`,
     [logoUrl]
   );
 };

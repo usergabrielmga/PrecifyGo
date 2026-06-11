@@ -1,11 +1,13 @@
 class EmissorModel {
   static async create(data, conn) {
     const normalize = v => (v === undefined ? null : v)
-    console.log("Payload para o banco:", data, conn);
-    const [result] = await conn.execute(
+
+    const result = await conn.query(
       `
-      INSERT INTO emissor (nome, email, telefone, endereco, cpf_cnpj, LogoTipo)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO emissor
+      (nome, email, telefone, endereco, cpf_cnpj, logotipo)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id_emissor
       `,
       [
         data.nome,
@@ -13,11 +15,11 @@ class EmissorModel {
         normalize(data.telefone),
         normalize(data.endereco),
         data.cpf_cnpj,
-        normalize(data.LogoTipo)
+        normalize(data.logotipo)
       ]
     )
 
-    return result.insertId
+    return result.rows[0].id_emissor
   }
 }
 

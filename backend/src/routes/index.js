@@ -1,6 +1,12 @@
 async function routes(fastify) {
 
-
+fastify.decorate("authenticate", async function (request, reply) {
+  try {
+    await request.jwtVerify()
+  } catch (err) {
+    reply.code(401).send({ error: "Não autorizado" })
+  }
+})
 
   fastify.register(require('./auth.routes'), {
     prefix: '/auth'
@@ -23,5 +29,7 @@ async function routes(fastify) {
 
 
 }
+
+
 
 module.exports = routes
