@@ -14,7 +14,6 @@ export function useOrcamentoPublico() {
 
   useEffect(() => {
     window.scrollTo({ top: 0 })
-
     async function fetchOrcamento() {
       if (!token) {
         setMensagem("Token inválido")

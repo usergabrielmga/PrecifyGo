@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { FaPlus } from "react-icons/fa";
-import Exterior from "../../assets/exterior.png";
-import Group from "../../assets/group.png";
-import Sign from "../../assets/sign-document.png";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import LogoutButton from "../../models/logoutModal";
 import Profile from "../../imgs/profile.png";
 import logo from "../../imgs/logo.png";
+
+import { LayoutDashboard, FileText, Users } from "lucide-react";
 
 export default function SideBar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -14,7 +12,7 @@ export default function SideBar() {
 
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // fechar dropdown ao clicar fora
+ 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent): void => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -28,7 +26,7 @@ export default function SideBar() {
 
   return (
     <>
-      {/* BOTÃO HAMBÚRGUER */}
+      
       <button
         onClick={() => setSidebarOpen(true)}
         className="md:hidden fixed top-4 left-4 z-50 bg-white border border-gray-200 p-2 rounded-lg shadow"
@@ -36,7 +34,7 @@ export default function SideBar() {
         ☰
       </button>
 
-      {/* OVERLAY */}
+      
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
@@ -44,7 +42,7 @@ export default function SideBar() {
         />
       )}
 
-      {/* SIDEBAR */}
+      
      <aside
   className={`
     fixed top-0 left-0 h-screen w-64 bg-white border-r border-gray-200 z-50
@@ -68,44 +66,55 @@ export default function SideBar() {
           </button>
         </div>
 
-        {/* BOTÃO PRINCIPAL */}
-        <div className="p-4">
-          <Link to="/orcamento" onClick={() => setSidebarOpen(false)}>
-            <button className="w-full flex items-center justify-center gap-2 bg-[#EA2E52] text-white py-3 rounded-xl shadow hover:opacity-90 transition">
-              Novo orçamento <FaPlus />
-            </button>
-          </Link>
-        </div>
-
+       
         {/* MENU */}
-        <nav className="flex-1 px-2 space-y-2 overflow-y-auto">
-          <Link
-            to="/dashboard"
+        <nav className="flex-1 px-2 space-y-2 overflow-y-auto pt-10">
+          <NavLink
+            to="/"
             onClick={() => setSidebarOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition"
+             className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                  isActive
+                    ? "bg-[#EA2E52] text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`
+              }
           >
-            <img className="w-6 h-6" src={Exterior} />
+            <LayoutDashboard className="w-6 h-6" />
+            
             <p className="font-medium">Visão geral</p>
-          </Link>
+          </NavLink>
 
-          <Link
+          <NavLink
             to="/viewOrcamento"
             onClick={() => setSidebarOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                isActive
+                  ? "bg-[#EA2E52] text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+              }`
+            }
           >
-            <img className="w-6 h-6" src={Sign} />
+            <FileText className="w-6 h-6" />
             <p className="font-medium">Orçamentos</p>
-          </Link>
+          </NavLink>
 
 
-          <Link
+          <NavLink
             to="/clientes"
             onClick={() => setSidebarOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition "
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                isActive
+                  ? "bg-[#EA2E52] text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+              }`
+            }
           >
-            <img className="w-6 h-6" src={Group} />
+            <Users className="w-6 h-6" />
             <p className="font-medium">Clientes</p>
-          </Link>
+          </NavLink>
         </nav>
 
         {/* PROFILE */}

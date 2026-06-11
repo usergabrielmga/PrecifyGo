@@ -7,6 +7,7 @@ import { createOrcamento } from "../../services/orcamentoService";
 import { useState } from "react";
 import { PdfSuccessModal } from "../../models/pdfSuccessModal";
 import { uploadLogo } from "../../services/logoService";
+import { useNotification } from "../../context/useNotification";
 
 type PdfSuccessState = {
   open: boolean;
@@ -21,7 +22,7 @@ export default function Orcamento() {
 
   const [logo, setLogo] = useState<File | null>(null);
 
-
+  const { showNotification } = useNotification();
 
  const {
   register,
@@ -65,12 +66,12 @@ const onSubmit = async (data: OrcamentoFormData) => {
 
     setPdfSuccess({
       open: true,
-      orcamentoId: response.Numero_Orcamento || response.id,
+      orcamentoId: response.numero_orcamento || response.id,
     });
 
   } catch (error) {
     console.error(error);
-    alert("Erro ao gerar orçamento");
+    showNotification("Erro ao gerar orçamento");
   }
 };
 
@@ -334,16 +335,8 @@ const onSubmit = async (data: OrcamentoFormData) => {
           <h2 className="font-semibold mb-4">Dados do Orçamento</h2>
 
           <div className="flex gap-4 mb-4">
-            <input
-              className="w-1/3 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
-              placeholder="Nº Orçamento"
-              {...register("numeroOrcamento")}
-            />
-              {errors.numeroOrcamento && ( 
-              <p className="text-red-500 text-sm mb-4">
-                {errors.numeroOrcamento.message}
-              </p>
-            )}
+            
+             
             <input
               className="w-1/3 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
               type="date"

@@ -7,15 +7,16 @@ import type { Orcamento } from "../types/orcamento";
 export function useOrcamentoCard(orcamento: Orcamento) {
   const [menuAberto, setMenuAberto] = useState(false);
   const { showNotification } = useNotification();
-
+  
   const downloadPDF = async () => {
     try {
-      const blob = await getOrcamentoPdf(orcamento.Numero_Orcamento);
+     
+      const blob = await getOrcamentoPdf(orcamento.numero_orcamento);
       const url = URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = `orcamento-${orcamento.Numero_Orcamento}.pdf`;
+      a.download = `orcamento-${orcamento.numero_orcamento}.pdf`;
       a.click();
 
       URL.revokeObjectURL(url);

@@ -90,7 +90,7 @@ export default function OrcamentoPublico() {
                 </div>
 
                 <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">
-                  Orçamento #{orcamento.Numero_Orcamento}
+                  Orçamento #{orcamento.numero_orcamento}
                 </h1>
               </div>
 
@@ -137,7 +137,7 @@ export default function OrcamentoPublico() {
 
           <div className="p-4 bg-gray-100">
             <iframe
-              src={`${API_URL}/orcamentos/${orcamento.Numero_Orcamento}/view-pdf`}
+              src={`${API_URL}/orcamentos/${orcamento.numero_orcamento}/view-pdf`}
               className="w-full h-[650px] rounded-lg bg-white"
             />
           </div>
@@ -152,7 +152,7 @@ export default function OrcamentoPublico() {
         >
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <a
-              href={`${API_URL}/orcamentos/${orcamento.Numero_Orcamento}/pdf`}
+              href={`${API_URL}/orcamentos/${orcamento.numero_orcamento}/pdf`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-6 py-3 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors"

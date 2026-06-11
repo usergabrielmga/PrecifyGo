@@ -36,7 +36,6 @@ export const orcamentoSchema = z.object({
 
 
   /* ================= Orçamento ================= */
-  numeroOrcamento: z.string().min(1, "Número do orçamento é obrigatório"),
   dataEmissao: z.string().min(1, "Data de emissão obrigatória"),
   dataValidade: z.string().min(1, "Data de validade obrigatória"),
 

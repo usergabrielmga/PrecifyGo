@@ -98,23 +98,23 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-white rounded-xl p-6 border border-gray-200"
+          className="bg-white rounded-xl p-4 md:p-6 border border-gray-200"
         >
           <h3 className="text-lg font-semibold mb-6">
             Distribuição por Status
           </h3>
 
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
+            <BarChart data={chartData} >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
+              <XAxis dataKey="name" tick={{ fontSize: 14 }} />
+              <YAxis width={30} />
               <Tooltip />
               <Bar
                 dataKey="quantidade"
                 fill="#10b981"
                 radius={[8, 8, 0, 0]}
-                barSize={60}
+                barSize={50}
               />
             </BarChart>
           </ResponsiveContainer>
@@ -134,8 +134,8 @@ export default function Dashboard() {
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
+              <XAxis dataKey="name"  tick={{ fontSize: 14 }} />
+              <YAxis width={30} />
               <Tooltip />
               <Line
                 type="monotone"
@@ -176,7 +176,7 @@ export default function Dashboard() {
                     animate={{ opacity: 1 }}
                     className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                   >
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">#ORC-{quote.Numero_Orcamento}</td>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">#ORC-{quote.numero_orcamento}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{quote.cliente}</td>
                     <td className="px-6 py-4 text-sm text-gray-900">
                       {new Intl.NumberFormat("pt-BR", {

@@ -40,8 +40,8 @@ export function useLogin() {
         navigate('/dashboard');
     
     },
-    onError: () => {
-        console.error('Erro ao logar com Google');
+    onError: (error) => {
+        console.error('Erro ao logar com Google', error);
     }
     });
 

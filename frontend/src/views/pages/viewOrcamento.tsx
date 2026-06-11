@@ -28,7 +28,7 @@ console.log("Orçamentos carregados:", orcamentos);
     const matchStatus = filtroStatus === "todos" || o.status === filtroStatus;
     const matchBusca =
       o.cliente.toLowerCase().includes(busca.toLowerCase()) ||
-      String(o.Numero_Orcamento).toLowerCase().includes(busca.toLowerCase());
+      String(o.numero_orcamento).toLowerCase().includes(busca.toLowerCase());
     return matchStatus && matchBusca;
   });
 

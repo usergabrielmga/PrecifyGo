@@ -1,5 +1,5 @@
 export interface OrcamentoPublico {
-  Numero_Orcamento: string | number
+  numero_orcamento: string | number
   cliente: string
   status: "Pendente" | "Aprovado" | "Rejeitado" | "Cancelado"
 

@@ -29,7 +29,7 @@ export async function getClientes() {
   const data = await response.json();
 
   return data.map((cliente: any) => ({
-    id: cliente.Id_cliente,
+    id: cliente.id_cliente,
     nome: cliente.nome,
     email: cliente.email,
     telefone: cliente.telefone,
