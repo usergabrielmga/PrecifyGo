@@ -26,6 +26,7 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "mysql2": "^3.16.0",
+    "pg": "^8.23.1",
     "puppeteer": "^24.42.0"
   },
   "devDependencies": {
