@@ -17,6 +17,21 @@ function getAuthHeaders() {
   };
 }
 
+export function getClientesCache() {
+  try {
+    const cache = localStorage.getItem("clientes_cache");
+
+    if (!cache) return null;
+
+    const parsed = JSON.parse(cache);
+
+    return parsed.data;
+  } catch {
+    localStorage.removeItem("clientes_cache");
+    return null;
+  }
+}
+
 export async function getClientes() {
   const response = await fetch(`${backend}/clientes`, {
     headers: getAuthHeaders(),
@@ -28,7 +43,7 @@ export async function getClientes() {
 
   const data = await response.json();
 
-  return data.map((cliente: any) => ({
+  const clientes = data.map((cliente: any) => ({
     id: cliente.id_cliente,
     nome: cliente.nome,
     email: cliente.email,
@@ -36,6 +51,20 @@ export async function getClientes() {
     endereco: cliente.endereco,
     cpf_cnpj: cliente.cpf_cnpj,
   }));
+
+  localStorage.setItem(
+    "clientes_cache",
+    JSON.stringify({
+      data: clientes,
+      timestamp: Date.now(),
+    })
+  );
+
+  return clientes;
+}
+
+export function clearClientesCache() {
+  localStorage.removeItem("clientes_cache");
 }
 
 export async function createCliente(

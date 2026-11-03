@@ -9,6 +9,8 @@ import Clientes from '../views/pages/clientes'
 import OrcamentoPublico from '../views/pages/OrcamentoPublico'
 import PrivateLayout from '../layouts/PrivateLayout'
 import Apresentation from '../views/pages/apresentation'
+import Produtos from '../views/pages/produtos'
+import Servicos from '../views/pages/servicos'
 
 export default function AppRoutes() {
   return (
@@ -76,6 +78,31 @@ export default function AppRoutes() {
     <PrivateRoute>
       <PrivateLayout>
         <Clientes />
+      </PrivateLayout>
+    </PrivateRoute>
+  }
+/>
+
+
+<Route
+  path="/produtos"
+  element={
+    <PrivateRoute>
+      <PrivateLayout>
+        <Produtos />
+      </PrivateLayout>
+    </PrivateRoute>
+  }
+/>
+
+
+
+<Route
+  path="/servicos"
+  element={
+    <PrivateRoute>
+      <PrivateLayout>
+        <Servicos />
       </PrivateLayout>
     </PrivateRoute>
   }

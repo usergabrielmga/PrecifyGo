@@ -24,14 +24,29 @@ export async function createOrcamento(data: OrcamentoFormData) {
 }
 
 
+export function getOrcamentosCache() {
+  try {
+    const cache = localStorage.getItem("orcamentos_cache");
+
+    if (!cache) return null;
+
+    const parsed = JSON.parse(cache);
+
+    return parsed.data;
+  } catch {
+    localStorage.removeItem("orcamentos_cache");
+    return null;
+  }
+}
+
 export async function getOrcamentos() {
   const token = localStorage.getItem("token");
 
   const response = await fetch(`${backend}/orcamentos`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   if (!response.ok) {
@@ -40,7 +55,17 @@ export async function getOrcamentos() {
     throw new Error("Erro ao buscar orçamentos");
   }
 
-  return response.json();
+  const data = await response.json();
+
+  localStorage.setItem(
+    "orcamentos_cache",
+    JSON.stringify({
+      data,
+      timestamp: Date.now(),
+    })
+  );
+
+  return data;
 }
 
 export async function getOrcamentoPdf(id: number) {
@@ -59,3 +84,5 @@ export async function getOrcamentoPdf(id: number) {
 
   return await response.blob();
 }
+
+

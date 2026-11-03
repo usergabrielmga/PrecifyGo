@@ -3,23 +3,30 @@ const ClienteModel = require('../models/cliente.model')
 const OrcamentoModel = require('../models/orcamento.model')
 const ItemModel = require('../models/item.model')
 const EmissorModel = require('../models/emissor.model')
+
 const fs = require('fs')
 const path = require('path')
 const puppeteer = require('puppeteer')
 const crypto = require('crypto')
-const { Pool } = require('pg')
-
 
 class OrcamentoService {
-  static async create(data, usuarioId) {
-    if (!data) throw new Error('Body vazio')
 
-      const client = await pool.connect()
+  // ================= CRIAR ORÇAMENTO =================
+
+  static async create(data, usuarioId) {
+    if (!data) {
+      throw new Error('Body vazio')
+    }
+
+    if (!Array.isArray(data.itens) || data.itens.length === 0) {
+      throw new Error('Orçamento precisa ter ao menos um item')
+    }
+
+    const client = await pool.connect()
 
     try {
       await client.query('BEGIN')
 
-      /* ================= EMISSOR ================= */
       const emissorData = {
         nome: data.nome,
         cpf_cnpj: data.cpfCnpj,
@@ -29,39 +36,40 @@ class OrcamentoService {
         LogoTipo: data.logo ?? null,
       }
 
-      const emissorId = await EmissorModel.create(emissorData, client, usuarioId)
+      const emissorId = await EmissorModel.create(
+        emissorData,
+        client,
+        usuarioId
+      )
 
-      /* ================= CLIENTE ================= */
-     const clienteData = {
-      nome: data.nomeClient?.trim(),
-      cpf_cnpj: data.cpfCnpjClient
-        ? String(data.cpfCnpjClient).replace(/\D/g, "")
-        : null,
-      endereco: data.enderecoClient?.trim() ?? null,
-      telefone: data.telefoneClient?.trim(),
-      email: data.emailClient?.trim(),
-    }
+      const clienteData = {
+        nome: data.nomeClient?.trim(),
+        cpf_cnpj: data.cpfCnpjClient
+          ? String(data.cpfCnpjClient).replace(/\D/g, '')
+          : null,
+        endereco: data.enderecoClient?.trim() ?? null,
+        telefone: data.telefoneClient?.trim() ?? null,
+        email: data.emailClient?.trim() ?? null,
+      }
 
-    
-    let clienteId = await ClienteModel.findByCpfCnpj(
-    clienteData.cpf_cnpj,
-    client,
-    usuarioId
-  )
+      let clienteId = await ClienteModel.findByCpfCnpj(
+        clienteData.cpf_cnpj,
+        client,
+        usuarioId
+      )
 
-  if (!clienteId) {
-    clienteId = await ClienteModel.create(
-      clienteData,
-      client,
-      usuarioId
-    )
-  }
+      if (!clienteId) {
+        clienteId = await ClienteModel.create(
+          clienteData,
+          client,
+          usuarioId
+        )
+      }
 
-    console.log("Cliente ID final:", clienteId)
+      console.log('Cliente ID final:', clienteId)
+
       const tokenPublico = crypto.randomBytes(32).toString('hex')
 
-
-      /* ================= ORÇAMENTO ================= */
       const orcamentoData = {
         formaPagamento: data.formaPagamento ?? null,
         motivoDesconto: data.motivoDesconto ?? null,
@@ -72,22 +80,23 @@ class OrcamentoService {
         observacoes: data.observacoes ?? null,
         Emissor_Id_emissor: emissorId,
         Cliente_Id_cliente: clienteId,
-        tokenPublico
+        tokenPublico,
       }
-      
 
-      const numeroOrcamento = await OrcamentoModel.create(orcamentoData, client, usuarioId)
+      const numeroOrcamento = await OrcamentoModel.create(
+        orcamentoData,
+        client,
+        usuarioId
+      )
 
-      /* ================= ITENS ================= */
-      if (!Array.isArray(data.itens) || data.itens.length === 0) {
-        throw new Error('Orçamento precisa ter ao menos um item')
-      }
+      console.log('Número do orçamento:', numeroOrcamento)
 
       for (const item of data.itens) {
         await ItemModel.create(
           numeroOrcamento,
           {
-            produto_servico: item.produtoServico,  
+            produto_id: item.produtoId ?? null,
+            servico_id: item.servicoId ?? null,
             quantidade: Number(item.quantidade) || 1,
             valor_unitario: Number(item.valorUnitario) || 0,
           },
@@ -101,92 +110,340 @@ class OrcamentoService {
         clienteId,
         emissorId,
         numero_orcamento: numeroOrcamento,
-        tokenPublico
+        tokenPublico,
       }
 
+    } catch (error) {
+      await client.query('ROLLBACK')
 
+      console.error('Erro ao criar orçamento:', error)
+
+      throw error
+
+    } finally {
+      client.release()
+    }
+  }
+
+  // ================= LISTAR ORÇAMENTOS =================
+
+  static async getAll(usuarioId) {
+    const client = await pool.connect()
+
+    try {
+      return await OrcamentoModel.findAllForModal(
+        client,
+        usuarioId
+      )
+    } finally {
+      client.release()
+    }
+  }
+
+  // ================= BUSCAR ORÇAMENTO POR ID =================
+
+  static async getById(id) {
+    const client = await pool.connect()
+
+    try {
+      const data = await OrcamentoModel.findCompleteById(
+        id,
+        client
+      )
+
+      if (!data) {
+        throw new Error('Orçamento não encontrado')
+      }
+
+      return data
+
+    } finally {
+      client.release()
+    }
+  }
+
+  // ================= ATUALIZAR STATUS E ESTOQUE =================
+
+  static async updateStatus(numeroOrcamento, novoStatus, usuarioId) {
+    const client = await pool.connect()
+
+    try {
+      await client.query('BEGIN')
+
+      const statusPermitidos = [
+        'Pendente',
+        'Aprovado',
+        'Recusado',
+        'Cancelado'
+      ]
+
+      if (!statusPermitidos.includes(novoStatus)) {
+        throw new Error('Status inválido')
+      }
+
+      // Bloqueia o orçamento durante a operação.
+      // Isso evita duas aprovações simultâneas.
+      const budgetResult = await client.query(
+        `
+        SELECT numero_orcamento, status
+        FROM dados_orcamento
+        WHERE numero_orcamento = $1
+          AND usuario_id = $2
+        FOR UPDATE
+        `,
+        [numeroOrcamento, usuarioId]
+      )
+
+      if (budgetResult.rows.length === 0) {
+        throw new Error('Orçamento não encontrado')
+      }
+
+      const statusAtual = budgetResult.rows[0].status
+
+      // Se já estiver no mesmo status, não faz nada.
+      if (statusAtual === novoStatus) {
+        await client.query('COMMIT')
+
+        return {
+          status: statusAtual,
+          message: 'O orçamento já está com esse status.'
+        }
+      }
+
+      // Não permite retirar a aprovação sem devolver o estoque.
+      if (statusAtual === 'Aprovado' && novoStatus !== 'Aprovado') {
+        throw new Error(
+          'Não é possível alterar o status de um orçamento aprovado sem antes devolver os produtos ao estoque.'
+        )
+      }
+
+      // ================= BAIXA DE ESTOQUE =================
+
+      if (novoStatus === 'Aprovado') {
+
+        // Busca somente os produtos.
+        // Serviços não possuem movimentação de estoque.
+        const produtosResult = await client.query(
+          `
+          SELECT
+            i.produto_id,
+            i.quantidade,
+            p.nome,
+            p.estoque
+          FROM itens_orcamento i
+          INNER JOIN produtos p
+            ON p.id_produto = i.produto_id
+          WHERE i.dados_orcamento_numero_orcamento = $1
+            AND i.produto_id IS NOT NULL
+          FOR UPDATE OF p
+          `,
+          [numeroOrcamento]
+        )
+
+        for (const item of produtosResult.rows) {
+
+          const quantidade = Number(item.quantidade)
+          const estoqueAtual = Number(item.estoque)
+
+          if (!Number.isInteger(quantidade) || quantidade <= 0) {
+            throw new Error(
+              `Quantidade inválida para o produto ${item.nome}.`
+            )
+          }
+
+          if (estoqueAtual < quantidade) {
+            throw new Error(
+              `Estoque insuficiente para o produto "${item.nome}". Disponível: ${estoqueAtual}. Necessário: ${quantidade}.`
+            )
+          }
+
+          // Retira a quantidade do estoque.
+          const updateEstoque = await client.query(
+            `
+            UPDATE produtos
+            SET estoque = estoque - $1
+            WHERE id_produto = $2
+              AND estoque >= $1
+            RETURNING estoque
+            `,
+            [quantidade, item.produto_id]
+          )
+
+          if (updateEstoque.rows.length === 0) {
+            throw new Error(
+              `Não foi possível atualizar o estoque do produto ${item.nome}.`
+            )
+          }
+
+          // Registra a saída no histórico.
+          await client.query(
+            `
+            INSERT INTO movimentacoes_estoque (
+              produto_id,
+              tipo,
+              quantidade,
+              observacao
+            )
+            VALUES ($1, 'SAIDA', $2, $3)
+            `,
+            [
+              item.produto_id,
+              quantidade,
+              `Baixa automática pelo orçamento #${numeroOrcamento}`
+            ]
+          )
+        }
+      }
+
+      // ================= ATUALIZAR STATUS =================
+
+      await client.query(
+        `
+      UPDATE dados_orcamento
+      SET status = $1,
+      data_resposta = NOW()
+      WHERE numero_orcamento = $2
+      AND usuario_id = $3
+        `,
+        [novoStatus, numeroOrcamento, usuarioId]
+      )
+
+      await client.query('COMMIT')
+
+      return {
+        status: novoStatus,
+        message: novoStatus === 'Aprovado'
+          ? 'Orçamento aprovado e estoque atualizado com sucesso.'
+          : 'Status do orçamento atualizado com sucesso.'
+      }
+
+    } catch (error) {
+      await client.query('ROLLBACK')
+
+      throw error
+
+    } finally {
+      client.release()
+    }
+  }
+
+  // ================= EXCLUIR ORÇAMENTO =================
+
+  static async delete(numeroOrcamento, usuarioId) {
+    const client = await pool.connect()
+
+    try {
+      await client.query('BEGIN')
+
+      const budget = await client.query(
+        `
+        SELECT status
+        FROM dados_orcamento
+        WHERE numero_orcamento = $1
+          AND usuario_id = $2
+        FOR UPDATE
+        `,
+        [numeroOrcamento, usuarioId]
+      )
+
+      if (budget.rows.length === 0) {
+        throw new Error('Orçamento não encontrado')
+      }
+
+      if (budget.rows[0].status === 'Aprovado') {
+        throw new Error(
+          'Não é possível excluir um orçamento aprovado sem antes devolver os produtos ao estoque.'
+        )
+      }
+
+      await client.query(
+        `
+        DELETE FROM itens_orcamento
+        WHERE dados_orcamento_numero_orcamento = $1
+        `,
+        [numeroOrcamento]
+      )
+
+      await client.query(
+        `
+        DELETE FROM dados_orcamento
+        WHERE numero_orcamento = $1
+          AND usuario_id = $2
+        `,
+        [numeroOrcamento, usuarioId]
+      )
+
+      await client.query('COMMIT')
 
     } catch (error) {
       await client.query('ROLLBACK')
       throw error
+
     } finally {
       client.release()
     }
   }
 
-  static async getAll(usuarioId) {
-    const client = await pool.connect()
-    try {
-      return await OrcamentoModel.findAllForModal(client, usuarioId)
-    } finally {
-      client.release()
-    }
-  }
-
-  static async getById(id) {
-  const client = await pool.connect()
-
-  try {
-    const data = await OrcamentoModel.findCompleteById(id, client)
-
-    if (!data) {
-      throw new Error('Budget not found')
-    }
-
-    return data
-  } finally {
-    client.release()
-  }
-}
-
+  // ================= GERAR PDF =================
 
   static async generatePdf(id) {
-  const { budget, items, total } = await this.getById(id)
+    const { budget, items, total } = await this.getById(id)
 
-  const templatePath = path.join(process.cwd(), 'templates/orcamento.html')
-  let html = fs.readFileSync(templatePath, 'utf-8')
+    const templatePath = path.join(
+      process.cwd(),
+      'templates/orcamento.html'
+    )
 
-  const itemsHtml = items.map(item => {
-  const unit = Number(item.valor_unitario)
-  const totalItem = Number(item.total_item)
+    let html = fs.readFileSync(templatePath, 'utf-8')
 
-  return `
-    <tr>
-      <td>${item.produto_servico}</td>
-      <td>${item.quantidade}</td>
-      <td>R$ ${unit.toFixed(2)}</td>
-      <td>R$ ${totalItem.toFixed(2)}</td>
-    </tr>
-  `
-}).join('')
+    const itemsHtml = items.map((item) => {
+      const unit = Number(item.valor_unitario)
+      const totalItem = Number(item.total_item)
 
-  html = html
-    .replace('{{logo}}', budget.emissor_logo || '')
-    .replace('{{numero_orcamento}}', budget.numero_orcamento)
-    .replace('{{emissor_nome}}', budget.emissor_nome)
-    .replace('{{emissor_email}}', budget.emissor_email)
-    .replace('{{emissor_telefone}}', budget.emissor_telefone)
-    .replace('{{cliente_nome}}', budget.cliente_nome)
-    .replace('{{cliente_email}}', budget.cliente_email)
-    .replace('{{cliente_telefone}}', budget.cliente_telefone)
-    .replace('{{items}}', itemsHtml)
-    .replace('{{total}}', total.toFixed(2))
+      return `
+        <tr>
+          <td>${item.produto_servico}</td>
+          <td>${item.quantidade}</td>
+          <td>R$ ${unit.toFixed(2)}</td>
+          <td>R$ ${totalItem.toFixed(2)}</td>
+        </tr>
+      `
+    }).join('')
 
-  const browser = await puppeteer.launch({ headless: 'new' })
-  const page = await browser.newPage()
+    html = html
+      .replace('{{logo}}', budget.emissor_logo || '')
+      .replace('{{numero_orcamento}}', String(budget.numero_orcamento))
+      .replace('{{emissor_nome}}', budget.emissor_nome || '')
+      .replace('{{emissor_email}}', budget.emissor_email || '')
+      .replace('{{emissor_telefone}}', budget.emissor_telefone || '')
+      .replace('{{cliente_nome}}', budget.cliente_nome || '')
+      .replace('{{cliente_email}}', budget.cliente_email || '')
+      .replace('{{cliente_telefone}}', budget.cliente_telefone || '')
+      .replace('{{items}}', itemsHtml)
+      .replace('{{total}}', total.toFixed(2))
 
-  await page.setContent(html, { waitUntil: 'networkidle0' })
+    const browser = await puppeteer.launch({
+      headless: true,
+    })
 
-  const pdf = await page.pdf({
-    format: 'A4',
-    printBackground: true
-  })
+    try {
+      const page = await browser.newPage()
 
-  await browser.close()
-  return pdf
+      await page.setContent(html, {
+        waitUntil: 'networkidle0',
+      })
+
+      const pdf = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+      })
+
+      return pdf
+
+    } finally {
+      await browser.close()
+    }
+  }
 }
-  
-}
-
 
 module.exports = OrcamentoService

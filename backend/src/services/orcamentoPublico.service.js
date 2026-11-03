@@ -1,5 +1,7 @@
+
 const db = require('../config/database')
 const OrcamentoPublicoModel = require('../models/orcamentoPublico.model')
+const OrcamentoService = require('./orcamento.service')
 
 class OrcamentoPublicoService {
 
@@ -25,12 +27,43 @@ class OrcamentoPublicoService {
     }
 
     const conn = await db.connect()
+    let orcamento
+
+    try {
+      orcamento = await OrcamentoPublicoModel.findByToken(token, conn)
+    } finally {
+      conn.release()
+    }
+
+    if (!orcamento) {
+      throw new Error('Orçamento não encontrado')
+    }
+
+    if (orcamento.status !== 'Pendente') {
+      throw new Error('Orçamento já respondido ou inválido')
+    }
+
+    // A aprovação utiliza a mesma lógica de estoque
+    // já existente no OrcamentoService.
+    if (status === 'Aprovado') {
+      await OrcamentoService.updateStatus(
+        orcamento.numero_orcamento,
+        'Aprovado',
+        orcamento.usuario_id
+      )
+
+      return true
+    }
+
+    // Rejeição e cancelamento continuam utilizando
+    // o fluxo público original.
+    const updateConn = await db.connect()
 
     try {
       const updated = await OrcamentoPublicoModel.updateStatus(
         token,
         status,
-        conn
+        updateConn
       )
 
       if (updated === 0) {
@@ -39,7 +72,7 @@ class OrcamentoPublicoService {
 
       return true
     } finally {
-      conn.release()
+      updateConn.release()
     }
   }
 

@@ -6,6 +6,10 @@ async function orcamentoRoutes(fastify) {
     preHandler: [fastify.authenticate]
   }, OrcamentoController.create)
 
+    fastify.patch('/:id/status', {
+    preHandler: [fastify.authenticate]
+  }, OrcamentoController.updateStatus)
+
   fastify.get('/:id/pdf', {
     preHandler: [fastify.authenticate]
   }, OrcamentoController.pdf)

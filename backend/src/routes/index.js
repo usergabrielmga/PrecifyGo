@@ -27,6 +27,14 @@ fastify.decorate("authenticate", async function (request, reply) {
   
   fastify.register(require('./logo.routes'))
 
+   fastify.register(require('./produtos.routes'), {
+    prefix: '/produtos'
+  })
+
+  fastify.register(require('./servicos.routes'), {
+  prefix: '/servicos'
+})
+
 
 }
 

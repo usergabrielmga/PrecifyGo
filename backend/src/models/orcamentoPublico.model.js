@@ -1,11 +1,12 @@
+
 class OrcamentoPublicoModel {
 
   static async findByToken(token, conn) {
-
     const result = await conn.query(
       `
       SELECT
         numero_orcamento,
+        usuario_id,
         forma_pagamento,
         validade,
         data_emissao,
@@ -21,20 +22,20 @@ class OrcamentoPublicoModel {
   }
 
   static async updateStatus(token, status, conn) {
-
     const result = await conn.query(
       `
       UPDATE dados_orcamento
       SET status = $1,
           data_resposta = NOW()
       WHERE token_publico = $2
-      AND status = 'Pendente'
+        AND status = 'Pendente'
       `,
       [status, token]
     )
 
     return result.rowCount
   }
+
 }
 
 module.exports = OrcamentoPublicoModel

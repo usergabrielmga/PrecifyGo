@@ -3,6 +3,7 @@ import {
   createCliente,
   deleteCliente,
   getClientes,
+  getClientesCache,
   updateCliente,
 } from "../services/clienteService";
 import type { Cliente } from "../types/client";
@@ -18,14 +19,21 @@ export function useClient() {
   }, []);
 
   async function fetchClientes() {
-    try {
-      const data = await getClientes();
-      setClientes(data);
-    } catch (error) {
-      showNotification("Erro ao buscar clientes");
-      console.error(error);
+  try {
+    const cache = getClientesCache();
+
+    if (cache) {
+      setClientes(cache);
     }
+
+    const data = await getClientes();
+
+    setClientes(data);
+  } catch (error) {
+    showNotification("Erro ao buscar clientes");
+    console.error(error);
   }
+}
 
  
   function normalizeCliente(data: Omit<Cliente, "id">) {

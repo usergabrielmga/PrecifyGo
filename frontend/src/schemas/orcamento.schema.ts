@@ -18,34 +18,50 @@ export const orcamentoSchema = z.object({
   emailClient: z.string().email("Email inválido"),
 
   /* ================= Itens ================= */
- itens: z.array(
-  z.object({
-    produtoServico: z
-      .string()
-      .min(1, "Produto obrigatório"),
+  itens: z.array(
+    z.object({
+      produtoId: z.number().nullable(),
+      servicoId: z.number().nullable(),
 
-    quantidade: z
-      .number()
-      .min(1, "Quantidade deve ser maior que 0"),
+      quantidade: z
+        .number()
+        .min(1, "Quantidade deve ser maior que 0"),
 
-    valorUnitario: z
-      .number()
-      .min(0.01, "Valor deve ser maior que 0"),
-  })
-).min(1, "Adicione ao menos um item"),
-
+      valorUnitario: z
+        .number()
+        .min(0.01, "Valor deve ser maior que 0"),
+    }).refine(
+      (item) =>
+        (item.produtoId !== null && item.servicoId === null) ||
+        (item.produtoId === null && item.servicoId !== null),
+      {
+        message: "Selecione um produto ou um serviço",
+      }
+    )
+  ).min(1, "Adicione ao menos um item"),
 
   /* ================= Orçamento ================= */
   dataEmissao: z.string().min(1, "Data de emissão obrigatória"),
   dataValidade: z.string().min(1, "Data de validade obrigatória"),
 
-  acrescimo: z.number().nonnegative("Acréscimo não pode ser negativo").optional(),
+  acrescimo: z
+    .number()
+    .nonnegative("Acréscimo não pode ser negativo")
+    .optional(),
+
   motivoAcrescimo: z.string().optional(),
 
-  desconto: z.number().nonnegative("Desconto não pode ser negativo").optional(),
+  desconto: z
+    .number()
+    .nonnegative("Desconto não pode ser negativo")
+    .optional(),
+
   motivoDesconto: z.string().optional(),
 
-  formaPagamento: z.string().min(1, "Forma de pagamento obrigatória"),
+  formaPagamento: z
+    .string()
+    .min(1, "Forma de pagamento obrigatória"),
+
   observacoes: z.string().optional(),
 });
 
