@@ -8,7 +8,7 @@ const cors = require('@fastify/cors')
 
 // CORS
 fastify.register(cors, {
-  origin: 'http://localhost:5173',
+  origin: 'https://precify-qmrjxweie-gabrieldasilvafreitasbr-6239s-projects.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 })
