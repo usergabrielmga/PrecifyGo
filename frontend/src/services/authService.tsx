@@ -1,7 +1,7 @@
 
 import { type LoginResponse, type RegisterResponse, type User } from '../types/user';
 
-const backend = 'https://precify-go.vercel.app';
+const backend = 'https://precifygo-production.up.railway.app';
 
 export const registerUser = async (
   userData: Omit<User, 'id'>

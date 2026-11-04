@@ -1,6 +1,6 @@
 import type { OrcamentoPublico } from "../types/orcamentoPublico"
 
-const backend = 'https://precify-go.vercel.app';
+const backend = 'https://precifygo-production.up.railway.app';
 
 export async function getOrcamentoPublico(token: string): Promise<OrcamentoPublico> {
   const response = await fetch(`${backend}/orcamento/publico/${token}`)

@@ -1,4 +1,4 @@
-const backend = 'https://precify-go.vercel.app';
+const backend = 'https://precifygo-production.up.railway.app';
 
 export function getDashboardCache() {
   try {
