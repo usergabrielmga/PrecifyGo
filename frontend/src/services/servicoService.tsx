@@ -8,7 +8,7 @@ export type Servico = {
   criado_em?: string;
 };
 
-const API_URL = "http://localhost:3000/servicos";
+const API_URL = "https://precify-go.vercel.app/servicos";
 
 async function verificarResposta(response: Response) {
   if (!response.ok) {

@@ -1,4 +1,4 @@
-const backend = 'http://localhost:3000';
+const backend = 'https://precify-go.vercel.app';
 
 export function getDashboardCache() {
   try {
