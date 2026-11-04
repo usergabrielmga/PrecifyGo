@@ -7,10 +7,16 @@ const fastify = require('fastify')({
 const cors = require('@fastify/cors')
 
 // CORS
+// CORS
 fastify.register(cors, {
-  origin: 'https://precify-qmrjxweie-gabrieldasilvafreitasbr-6239s-projects.vercel.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: [
+    'http://localhost:5173',
+    'https://precify-go.vercel.app',
+    'https://precify-qmrjxweie-gabrieldasilvafreitasbr-6239s-projects.vercel.app'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 })
 
 // JWT
