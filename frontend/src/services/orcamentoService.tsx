@@ -1,6 +1,6 @@
 import type { OrcamentoFormData } from "../schemas/orcamento.schema";
 
-const backend = 'https://precifygo-production.up.railway.app';
+const backend = 'https://precify-go-3tri.vercel.app';
 
 export async function createOrcamento(data: OrcamentoFormData) {
   const token = localStorage.getItem("token");

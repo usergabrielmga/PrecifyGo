@@ -1,4 +1,4 @@
-const backend = 'https://precifygo-production.up.railway.app';
+const backend = 'https://precify-go-3tri.vercel.app';
 
 export async function uploadLogo(file: File) {
   const formData = new FormData()

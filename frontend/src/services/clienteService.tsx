@@ -6,7 +6,7 @@ export type ClientePayload = {
   cpf_cnpj: string;
 };
 
-const backend = 'https://precifygo-production.up.railway.app';
+const backend = 'https://precify-go-3tri.vercel.app';
 
 function getAuthHeaders() {
   const token = localStorage.getItem('token');
