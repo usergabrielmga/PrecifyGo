@@ -9,7 +9,7 @@ import {
 import { useOrcamentoPublico } from "../../hooks/useOrcamentoPublico";
 import { motion } from "framer-motion";
 
-const API_URL = "http://localhost:3000";
+const API_URL = "https://precifygo-production.up.railway.app";
 
 export default function OrcamentoPublico() {
   const { orcamento, loading, mensagem, responder } =

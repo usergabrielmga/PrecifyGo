@@ -41,7 +41,7 @@ type Servico = {
   ativo: boolean;
 };
 
-const backend = "http://localhost:3000";
+const backend = "https://precifygo-production.up.railway.app";
 
 export default function Orcamento() {
   const [pdfSuccess, setPdfSuccess] =
