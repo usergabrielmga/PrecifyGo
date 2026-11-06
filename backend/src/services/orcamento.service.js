@@ -422,13 +422,17 @@ class OrcamentoService {
       .replace('{{items}}', itemsHtml)
       .replace('{{total}}', total.toFixed(2))
 
+    console.log('===== TESTE PUPPETE RAILWAY =====')
+    console.log('Executável:', puppeteer.executablePath())
+
     const browser = await puppeteer.launch({
       headless: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage'
-      ]
+      ],
+      dumpio: true
     })
 
     try {
