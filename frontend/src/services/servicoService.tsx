@@ -8,7 +8,7 @@ export type Servico = {
   criado_em?: string;
 };
 
-const API_URL = "https://precify-go-3tri.vercel.app";
+const API_URL = "https://precify-go-3tri.vercel.app/servicos";
 
 async function verificarResposta(response: Response) {
   if (!response.ok) {
