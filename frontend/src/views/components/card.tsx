@@ -20,17 +20,21 @@ export default function Card({ title, value }: CardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow"
+      className="bg-white rounded-xl p-3 md:p-6 border border-gray-200 hover:shadow-lg transition-shadow"
     >
-      <div className="flex items-start justify-between mb-4">
-        <div className="w-12 h-12 bg-[#FEF2F4] rounded-lg flex items-center justify-center">
+      <div className="flex items-start justify-between mb-2 md:mb-4">
+        <div className="w-9 h-9 md:w-12 md:h-12 bg-[#FEF2F4] rounded-lg flex items-center justify-center">
           {icons[title as keyof typeof icons] || <FileText size={24} color="#EA2E52" />}
         </div>
       </div>
 
       <div>
-        <p className="text-3xl font-semibold text-gray-900 mb-1">{value}</p>
-        <p className="text-sm text-gray-600">{title}</p>
+        <p className="text-xl md:text-3xl font-semibold text-gray-900 mb-1">
+          {value}
+        </p>
+        <p className="text-xs md:text-sm text-gray-600">
+          {title}
+        </p>
       </div>
     </motion.div>
   )

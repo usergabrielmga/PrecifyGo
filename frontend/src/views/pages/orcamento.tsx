@@ -314,15 +314,15 @@ export default function Orcamento() {
    */
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto px-3 md:px-0">
 
       {/* =================================================
           TÍTULO
       ================================================= */}
 
-      <div className="flex flex-col items-center gap-2 text-[#474646] mb-10">
+      <div className="flex flex-col items-center gap-1 md:gap-2 text-[#474646] mb-5 md:mb-10 text-center">
 
-        <h1 className="font-bold text-2xl">
+        <h1 className="font-bold text-xl md:text-2xl">
           Gerar Orçamento
         </h1>
 
@@ -336,22 +336,22 @@ export default function Orcamento() {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-4"
+        className="space-y-3 md:space-y-4"
       >
 
         {/* =================================================
             DADOS DO EMISSOR
         ================================================= */}
 
-        <section className="border border-[#918E8E] p-4 rounded-lg">
+        <section className="border border-[#918E8E] p-3 md:p-4 rounded-lg">
 
-          <h2 className="font-semibold mb-4">
+          <h2 className="font-semibold text-sm md:text-base mb-3 md:mb-4">
             Dados do Emissor
           </h2>
 
           <div className="mb-4">
 
-            <label className="text-sm block mb-1">
+            <label className="text-xs md:text-sm block mb-1">
               Logotipo (opcional)
             </label>
 
@@ -364,19 +364,19 @@ export default function Orcamento() {
 
           </div>
 
-          <div className="flex justify-between gap-4 mb-4">
+          <div className="flex justify-between gap-2 md:gap-4 mb-3 md:mb-4">
 
             <div className="w-1/2">
 
               <input
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+                className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
                 type="text"
                 placeholder="Nome"
                 {...register("nome")}
               />
 
               {errors.nome && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-500 text-xs md:text-sm mt-1">
                   {errors.nome.message}
                 </p>
               )}
@@ -386,14 +386,14 @@ export default function Orcamento() {
             <div className="w-1/2">
 
               <input
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+                className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
                 type="text"
                 placeholder="CPF / CNPJ"
                 {...register("cpfCnpj")}
               />
 
               {errors.cpfCnpj && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-500 text-xs md:text-sm mt-1">
                   {errors.cpfCnpj.message}
                 </p>
               )}
@@ -403,31 +403,31 @@ export default function Orcamento() {
           </div>
 
           <input
-            className="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2"
+            className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 mb-3 md:mb-4 focus:outline-none focus:ring-2"
             type="text"
             placeholder="Endereço"
             {...register("endereco")}
           />
 
           {errors.endereco && (
-            <p className="text-red-500 text-sm mb-4">
+            <p className="text-red-500 text-xs md:text-sm mb-3 md:mb-4">
               {errors.endereco.message}
             </p>
           )}
 
-          <div className="flex gap-4">
+          <div className="flex gap-2 md:gap-4">
 
             <div className="w-1/2">
 
               <input
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+                className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
                 type="text"
                 placeholder="Telefone"
                 {...register("telefone")}
               />
 
               {errors.telefone && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-500 text-xs md:text-sm mt-1">
                   {errors.telefone.message}
                 </p>
               )}
@@ -437,14 +437,14 @@ export default function Orcamento() {
             <div className="w-1/2">
 
               <input
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+                className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
                 type="email"
                 placeholder="Email"
                 {...register("email")}
               />
 
               {errors.email && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-500 text-xs md:text-sm mt-1">
                   {errors.email.message}
                 </p>
               )}
@@ -459,9 +459,9 @@ export default function Orcamento() {
             DADOS DO CLIENTE
         ================================================= */}
 
-        <section className="border border-[#918E8E] p-4 rounded-lg">
+        <section className="border border-[#918E8E] p-3 md:p-4 rounded-lg">
 
-          <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center justify-between gap-2 mb-3 md:mb-4">
             <h2 className="font-semibold">
               Dados do Cliente
             </h2>
@@ -469,25 +469,25 @@ export default function Orcamento() {
             <button
               type="button"
               onClick={abrirModalClientes}
-              className="border border-blue-600 text-blue-600 rounded px-4 py-2 text-sm font-medium hover:bg-blue-600 hover:text-white cursor-pointer"
+              className="border border-blue-600 text-blue-600 rounded px-2.5 py-1.5 text-xs md:text-sm md:px-4 md:py-2 font-medium hover:bg-blue-600 hover:text-white cursor-pointer"
             >
               Selecionar cliente
             </button>
           </div>
 
-          <div className="flex gap-4 mb-4">
+          <div className="flex gap-2 md:gap-4 mb-3 md:mb-4">
 
             <div className="w-1/2">
 
               <input
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+                className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
                 type="text"
                 placeholder="Nome"
                 {...register("nomeClient")}
               />
 
               {errors.nomeClient && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-500 text-xs md:text-sm mt-1">
                   {errors.nomeClient.message}
                 </p>
               )}
@@ -497,14 +497,14 @@ export default function Orcamento() {
             <div className="w-1/2">
 
               <input
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+                className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
                 type="text"
                 placeholder="CPF / CNPJ"
                 {...register("cpfCnpjClient")}
               />
 
               {errors.cpfCnpjClient && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-500 text-xs md:text-sm mt-1">
                   {
                     errors.cpfCnpjClient
                       .message
@@ -517,14 +517,14 @@ export default function Orcamento() {
           </div>
 
           <input
-            className="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2"
+            className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 mb-3 md:mb-4 focus:outline-none focus:ring-2"
             type="text"
             placeholder="Endereço"
             {...register("enderecoClient")}
           />
 
           {errors.enderecoClient && (
-            <p className="text-red-500 text-sm mb-4">
+            <p className="text-red-500 text-xs md:text-sm mb-3 md:mb-4">
               {
                 errors.enderecoClient
                   .message
@@ -532,19 +532,19 @@ export default function Orcamento() {
             </p>
           )}
 
-          <div className="flex gap-4">
+          <div className="flex gap-2 md:gap-4">
 
             <div className="w-1/2">
 
               <input
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+                className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
                 type="text"
                 placeholder="Telefone"
                 {...register("telefoneClient")}
               />
 
               {errors.telefoneClient && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-500 text-xs md:text-sm mt-1">
                   {
                     errors.telefoneClient
                       .message
@@ -557,14 +557,14 @@ export default function Orcamento() {
             <div className="w-1/2">
 
               <input
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+                className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
                 type="email"
                 placeholder="Email"
                 {...register("emailClient")}
               />
 
               {errors.emailClient && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-500 text-xs md:text-sm mt-1">
                   {
                     errors.emailClient
                       .message
@@ -582,20 +582,20 @@ export default function Orcamento() {
             ITENS DO ORÇAMENTO
         ================================================= */}
 
-        <section className="border border-[#918E8E] p-4 rounded-lg">
+        <section className="border border-[#918E8E] p-3 md:p-4 rounded-lg">
 
-          <h2 className="font-semibold mb-4">
+          <h2 className="font-semibold text-sm md:text-base mb-3 md:mb-4">
             Itens do Orçamento
           </h2>
 
           {/* BOTÕES */}
 
-          <div className="flex gap-3 mb-6">
+          <div className="flex gap-2 md:gap-3 mb-4 md:mb-6">
 
             <button
               type="button"
               onClick={abrirModalProdutos}
-              className="flex-1 border border-blue-600 text-blue-600 rounded px-4 py-3 font-medium hover:bg-blue-600 hover:text-white cursor-pointer"
+              className="flex-1 border border-blue-600 text-blue-600 rounded px-2 py-2 md:px-4 md:py-3 text-xs md:text-base font-medium hover:bg-blue-600 hover:text-white cursor-pointer"
             >
               + Adicionar item
             </button>
@@ -603,7 +603,7 @@ export default function Orcamento() {
             <button
               type="button"
               onClick={abrirModalServicos}
-              className="flex-1 border border-green-600 text-green-600 rounded px-4 py-3 font-medium hover:bg-green-600 hover:text-white cursor-pointer"
+              className="flex-1 border border-green-600 text-green-600 rounded px-2 py-2 md:px-4 md:py-3 text-xs md:text-base font-medium hover:bg-green-600 hover:text-white cursor-pointer"
             >
               + Adicionar serviço
             </button>
@@ -613,7 +613,7 @@ export default function Orcamento() {
           {/* ITENS */}
 
           {fields.length === 0 && (
-            <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-500">
+            <div className="border border-dashed border-gray-300 rounded-lg p-4 md:p-6 text-center text-xs md:text-sm text-gray-500">
               Nenhum item adicionado ao orçamento.
             </div>
           )}
@@ -621,7 +621,7 @@ export default function Orcamento() {
           {fields.length > 0 && (
             <div>
 
-              <h3 className="font-semibold mb-3">
+              <h3 className="font-semibold text-sm md:text-base mb-2 md:mb-3">
                 Itens adicionados
               </h3>
 
@@ -668,20 +668,20 @@ export default function Orcamento() {
                   return (
                     <div
                       key={field.id}
-                      className="border border-gray-300 rounded-lg p-4 mb-4"
+                      className="border border-gray-300 rounded-lg p-3 md:p-4 mb-3 md:mb-4"
                     >
 
-                      <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-start justify-between mb-3 md:mb-4">
 
                         <div>
 
-                          <p className="font-semibold text-lg">
+                          <p className="font-semibold text-sm md:text-lg">
                             {produto?.nome ||
                               servico?.nome ||
                               "Item"}
                           </p>
 
-                          <p className="text-sm text-gray-500">
+                          <p className="text-xs md:text-sm text-gray-500">
                             {produto
                               ? "Produto"
                               : "Serviço"}
@@ -694,23 +694,23 @@ export default function Orcamento() {
                           onClick={() =>
                             remove(index)
                           }
-                          className="text-sm text-red-600 border border-red-600 rounded px-3 py-1 hover:bg-red-600 hover:text-white cursor-pointer"
+                          className="text-xs md:text-sm text-red-600 border border-red-600 rounded px-2.5 py-1 hover:bg-red-600 hover:text-white cursor-pointer"
                         >
                           Remover
                         </button>
 
                       </div>
 
-                      <div className="flex gap-4">
+                      <div className="flex gap-2 md:gap-4">
 
-                        <div className="w-1/3">
+                        <div className="w-1/3 min-w-0">
 
-                          <label className="text-sm block mb-1">
+                          <label className="text-xs md:text-sm block mb-1">
                             Quantidade
                           </label>
 
                           <input
-                            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+                            className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
                             type="number"
                             min="1"
                             {...register(
@@ -725,7 +725,7 @@ export default function Orcamento() {
                           {errors.itens?.[
                             index
                           ]?.quantidade && (
-                            <p className="text-red-500 text-sm mt-1">
+                            <p className="text-red-500 text-xs md:text-sm mt-1">
                               {
                                 errors
                                   .itens[
@@ -739,14 +739,14 @@ export default function Orcamento() {
 
                         </div>
 
-                        <div className="w-1/3">
+                        <div className="w-1/3 min-w-0">
 
-                          <label className="text-sm block mb-1">
+                          <label className="text-xs md:text-sm block mb-1">
                             Valor unitário
                           </label>
 
                           <input
-                            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+                            className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
                             type="number"
                             min="0.01"
                             step="0.01"
@@ -762,7 +762,7 @@ export default function Orcamento() {
                           {errors.itens?.[
                             index
                           ]?.valorUnitario && (
-                            <p className="text-red-500 text-sm mt-1">
+                            <p className="text-red-500 text-xs md:text-sm mt-1">
                               {
                                 errors
                                   .itens[
@@ -776,14 +776,14 @@ export default function Orcamento() {
 
                         </div>
 
-                        <div className="w-1/3">
+                        <div className="w-1/3 min-w-0">
 
-                          <label className="text-sm block mb-1">
+                          <label className="text-xs md:text-sm block mb-1">
                             Total
                           </label>
 
                           <input
-                            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
+                            className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 bg-gray-100"
                             value={total.toFixed(2)}
                             disabled
                           />
@@ -801,7 +801,7 @@ export default function Orcamento() {
           )}
 
           {errors.itens?.root && (
-            <p className="text-red-500 text-sm mt-2">
+            <p className="text-red-500 text-xs md:text-sm mt-2">
               {errors.itens.root.message}
             </p>
           )}
@@ -812,28 +812,28 @@ export default function Orcamento() {
             DADOS DO ORÇAMENTO
         ================================================= */}
 
-        <section className="border border-[#918E8E] p-4 rounded-lg">
+        <section className="border border-[#918E8E] p-3 md:p-4 rounded-lg">
 
-          <h2 className="font-semibold mb-4">
+          <h2 className="font-semibold text-sm md:text-base mb-3 md:mb-4">
             Dados do Orçamento
           </h2>
 
-          <div className="flex gap-4 mb-4">
+          <div className="flex gap-2 md:gap-4 mb-3 md:mb-4">
 
             <div className="w-1/2">
 
-              <label className="text-sm block mb-1">
+              <label className="text-xs md:text-sm block mb-1">
                 Data de emissão
               </label>
 
               <input
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+                className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
                 type="date"
                 {...register("dataEmissao")}
               />
 
               {errors.dataEmissao && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-500 text-xs md:text-sm mt-1">
                   {errors.dataEmissao.message}
                 </p>
               )}
@@ -842,18 +842,18 @@ export default function Orcamento() {
 
             <div className="w-1/2">
 
-              <label className="text-sm block mb-1">
+              <label className="text-xs md:text-sm block mb-1">
                 Data de validade
               </label>
 
               <input
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+                className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
                 type="date"
                 {...register("dataValidade")}
               />
 
               {errors.dataValidade && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-500 text-xs md:text-sm mt-1">
                   {errors.dataValidade.message}
                 </p>
               )}
@@ -864,10 +864,10 @@ export default function Orcamento() {
 
           {/* ACRÉSCIMO */}
 
-          <div className="flex gap-4 mb-4">
+          <div className="flex gap-2 md:gap-4 mb-3 md:mb-4">
 
             <input
-              className="w-1/2 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+              className="w-1/2 border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
               placeholder="Acréscimo"
               type="number"
               step="0.01"
@@ -880,7 +880,7 @@ export default function Orcamento() {
             />
 
             <input
-              className="w-1/2 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+              className="w-1/2 border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
               placeholder="Motivo do acréscimo"
               {...register(
                 "motivoAcrescimo"
@@ -891,10 +891,10 @@ export default function Orcamento() {
 
           {/* DESCONTO */}
 
-          <div className="flex gap-4 mb-4">
+          <div className="flex gap-2 md:gap-4 mb-3 md:mb-4">
 
             <input
-              className="w-1/2 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+              className="w-1/2 border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
               placeholder="Desconto"
               type="number"
               step="0.01"
@@ -907,7 +907,7 @@ export default function Orcamento() {
             />
 
             <input
-              className="w-1/2 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+              className="w-1/2 border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
               placeholder="Motivo do desconto"
               {...register(
                 "motivoDesconto"
@@ -919,7 +919,7 @@ export default function Orcamento() {
           {/* FORMA DE PAGAMENTO */}
 
           <input
-            className="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2"
+            className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 mb-3 md:mb-4 focus:outline-none focus:ring-2"
             placeholder="Forma de pagamento"
             {...register(
               "formaPagamento"
@@ -927,7 +927,7 @@ export default function Orcamento() {
           />
 
           {errors.formaPagamento && (
-            <p className="text-red-500 text-sm mb-4">
+            <p className="text-red-500 text-xs md:text-sm mb-3 md:mb-4">
               {
                 errors.formaPagamento
                   .message
@@ -938,7 +938,7 @@ export default function Orcamento() {
           {/* OBSERVAÇÕES */}
 
           <textarea
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+            className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm md:text-base md:px-3 md:py-2 focus:outline-none focus:ring-2"
             rows={4}
             placeholder="Observações"
             {...register("observacoes", {
@@ -957,7 +957,7 @@ export default function Orcamento() {
 
         <button
           type="submit"
-          className="w-full bg-[#EA2E52] text-white py-3 rounded-lg font-semibold transition cursor-pointer"
+          className="w-full bg-[#EA2E52] text-white py-2.5 md:py-3 text-sm md:text-base rounded-lg font-semibold transition cursor-pointer"
         >
           Gerar Agora
         </button>
