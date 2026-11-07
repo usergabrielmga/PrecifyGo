@@ -8,17 +8,13 @@ import ViewOrcamento from '../views/pages/viewOrcamento'
 import Clientes from '../views/pages/clientes'
 import OrcamentoPublico from '../views/pages/OrcamentoPublico'
 import PrivateLayout from '../layouts/PrivateLayout'
-import Apresentation from '../views/pages/apresentation'
 import Produtos from '../views/pages/produtos'
 import Servicos from '../views/pages/servicos'
 
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route
-        path="/inicio"
-        element={<Apresentation />}
-      />
+      
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       
