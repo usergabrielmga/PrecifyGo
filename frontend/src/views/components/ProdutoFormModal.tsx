@@ -242,7 +242,7 @@ export default function ProdutoFormModal({
                   required
                   maxLength={150}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-[#EA2E52] focus:ring-2 focus:ring-[#EA2E52]/20"
-                  placeholder="Ex.: Teclado Mecânico"
+                  placeholder="Ex.: valvula de controle"
                 />
               </div>
 

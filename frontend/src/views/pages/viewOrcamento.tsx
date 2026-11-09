@@ -7,13 +7,13 @@ import { motion } from "framer-motion";
 import OrcamentoCard from "../components/Orcamento.card";
 import { useViewOrcamentos } from "../../hooks/useViewOrcamentos";
 
-type StatusFiltro = "todos" | "Aprovado" | "Pendente" | "Recusado" | "Cancelado";
+type StatusFiltro = "todos" | "Aprovado" | "Pendente" | "Rejeitado" | "Cancelado";
 
 const FILTROS: { label: string; value: StatusFiltro }[] = [
   { label: "Todos", value: "todos" },
   { label: "Aprovado", value: "Aprovado" },
   { label: "Pendente", value: "Pendente" },
-  { label: "Recusado", value: "Recusado" },
+  { label: "Rejeitado", value: "Rejeitado" },
   { label: "Cancelado", value: "Cancelado" },
 ];
 
@@ -91,7 +91,7 @@ export default function ViewOrcamento() {
         {[
           { label: "Aprovados", status: "Aprovado", color: "green" },
           { label: "Pendentes", status: "Pendente", color: "yellow" },
-          { label: "Recusados", status: "Recusado", color: "red" },
+          { label: "Rejeitados", status: "Rejeitado", color: "red" },
           { label: "Cancelados", status: "Cancelado", color: "gray" },
         ].map(({ label, status, color }, i) => (
           <motion.div

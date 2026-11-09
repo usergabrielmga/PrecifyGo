@@ -102,7 +102,7 @@ export default function ServicoFormModal({
             <input
               value={nome}
               onChange={(e) => setNome(e.target.value)}
-              placeholder="Ex.: Manutenção de computadores"
+              placeholder="Ex.: Manutenção de componentes"
               className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#EA2E52]"
               required
             />
