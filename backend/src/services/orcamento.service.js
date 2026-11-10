@@ -391,8 +391,14 @@ class OrcamentoService {
 
     const templatePath = path.join(
       process.cwd(),
-      'templates/orcamento.html'
+      'templates',
+      'orcamento.html'
     )
+
+    if (!fs.existsSync(templatePath)) {
+      throw new Error(`Template não encontrado: ${templatePath}`)
+    }
+
 
     let html = fs.readFileSync(templatePath, 'utf-8')
 
