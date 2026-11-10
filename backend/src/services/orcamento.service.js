@@ -6,7 +6,13 @@ const EmissorModel = require('../models/emissor.model')
 
 const fs = require('fs')
 const path = require('path')
-const puppeteer = require('puppeteer')
+const puppeteer = process.env.VERCEL
+  ? require('puppeteer-core')
+  : require('puppeteer')
+
+const chromium = process.env.VERCEL
+  ? require('@sparticuz/chromium')
+  : null
 const crypto = require('crypto')
 
 class OrcamentoService {
@@ -431,15 +437,23 @@ class OrcamentoService {
     console.log('===== TESTE PUPPETE RAILWAY =====')
     console.log('Executável:', puppeteer.executablePath())
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage'
-      ],
-      dumpio: true
-    })
+    const browser = await puppeteer.launch(
+  process.env.VERCEL
+    ? {
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+      }
+    : {
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage'
+        ]
+      }
+)
 
     try {
       const page = await browser.newPage()

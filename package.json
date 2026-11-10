@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@fastify/cors": "^11.2.0",
-    "pg": "^8.20.0"
+    "@sparticuz/chromium": "^153.0.0",
+    "pg": "^8.20.0",
+    "puppeteer-core": "^25.17.0"
   }
 }
