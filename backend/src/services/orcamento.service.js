@@ -9,10 +9,6 @@ const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
 
-// Chromium compatível com Railway/Linux
-const chromium = require('@sparticuz/chromium')
-const puppeteer = require('puppeteer-core')
-
 class OrcamentoService {
 
   // ================= CRIAR ORÇAMENTO =================
@@ -425,7 +421,11 @@ class OrcamentoService {
     let browser
 
     try {
-      console.log('===== INICIANDO CHROMIUM NO RAILWAY =====')
+      console.log('===== INICIANDO CHROMIUM NA VERCEL =====')
+
+      // Carrega as bibliotecas somente quando um PDF for solicitado
+      const chromium = require('@sparticuz/chromium')
+      const puppeteer = require('puppeteer-core')
 
       const executablePath = await chromium.executablePath()
 
