@@ -423,12 +423,14 @@ class OrcamentoService {
     try {
       console.log('===== INICIANDO CHROMIUM NA VERCEL =====')
 
-      // Importação dinâmica: compatível com CommonJS e pacote ESM
-      const chromiumModule = await import('@sparticuz/chromium')
-      const chromium = chromiumModule.default
+      // Importação dinâmica dos dois pacotes ESM
+      const [chromiumModule, puppeteerModule] = await Promise.all([
+        import('@sparticuz/chromium'),
+        import('puppeteer-core')
+      ])
 
-      // Puppeteer continua utilizando CommonJS
-      const puppeteer = require('puppeteer-core')
+      const chromium = chromiumModule.default
+      const puppeteer = puppeteerModule.default
 
       const executablePath = await chromium.executablePath()
 
