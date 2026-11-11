@@ -1,3 +1,4 @@
+
 export type Produto = {
   id_produto: number;
   nome: string;
@@ -10,9 +11,24 @@ export type Produto = {
 
 const API_URL = "https://precify-go-3tri.vercel.app/produtos";
 
+// Recupera o token salvo após o login
+function obterHeaders(json = true): HeadersInit {
+  const token = localStorage.getItem("token");
+
+  return {
+    ...(json ? { "Content-Type": "application/json" } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
 async function verificarResposta(response: Response) {
   if (!response.ok) {
     const erro = await response.json().catch(() => null);
+
+    if (response.status === 401) {
+      throw new Error("Sessão expirada ou não autorizada. Faça login novamente.");
+    }
+
     throw new Error(erro?.error || "Erro ao comunicar com a API");
   }
 
@@ -20,7 +36,13 @@ async function verificarResposta(response: Response) {
 }
 
 export async function listarProdutos(): Promise<Produto[]> {
-  const response = await verificarResposta(await fetch(API_URL));
+  const response = await verificarResposta(
+    await fetch(API_URL, {
+      method: "GET",
+      headers: obterHeaders(false),
+    })
+  );
+
   return response.json();
 }
 
@@ -30,7 +52,7 @@ export async function criarProduto(
   const response = await verificarResposta(
     await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: obterHeaders(),
       body: JSON.stringify(produto),
     })
   );
@@ -45,7 +67,7 @@ export async function atualizarProduto(
   const response = await verificarResposta(
     await fetch(`${API_URL}/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: obterHeaders(),
       body: JSON.stringify(produto),
     })
   );
@@ -57,6 +79,7 @@ export async function excluirProduto(id: number): Promise<void> {
   await verificarResposta(
     await fetch(`${API_URL}/${id}`, {
       method: "DELETE",
+      headers: obterHeaders(false),
     })
   );
 }
@@ -69,7 +92,7 @@ export async function registrarEntradaEstoque(
   const response = await verificarResposta(
     await fetch(`${API_URL}/${produtoId}/entrada`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: obterHeaders(),
       body: JSON.stringify({ quantidade }),
     })
   );
