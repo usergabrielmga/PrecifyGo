@@ -1,3 +1,4 @@
+
 const pool = require('../config/database')
 const ClienteModel = require('../models/cliente.model')
 const OrcamentoModel = require('../models/orcamento.model')
@@ -6,8 +7,11 @@ const EmissorModel = require('../models/emissor.model')
 
 const fs = require('fs')
 const path = require('path')
-const puppeteer = require('puppeteer')
 const crypto = require('crypto')
+
+// Chromium compatível com Railway/Linux
+const chromium = require('@sparticuz/chromium')
+const puppeteer = require('puppeteer-core')
 
 class OrcamentoService {
 
@@ -115,9 +119,7 @@ class OrcamentoService {
 
     } catch (error) {
       await client.query('ROLLBACK')
-
       console.error('Erro ao criar orçamento:', error)
-
       throw error
 
     } finally {
@@ -181,8 +183,6 @@ class OrcamentoService {
         throw new Error('Status inválido')
       }
 
-      // Bloqueia o orçamento durante a operação.
-      // Isso evita duas aprovações simultâneas.
       const budgetResult = await client.query(
         `
         SELECT numero_orcamento, status
@@ -200,7 +200,6 @@ class OrcamentoService {
 
       const statusAtual = budgetResult.rows[0].status
 
-      // Se já estiver no mesmo status, não faz nada.
       if (statusAtual === novoStatus) {
         await client.query('COMMIT')
 
@@ -210,7 +209,6 @@ class OrcamentoService {
         }
       }
 
-      // Não permite retirar a aprovação sem devolver o estoque.
       if (statusAtual === 'Aprovado' && novoStatus !== 'Aprovado') {
         throw new Error(
           'Não é possível alterar o status de um orçamento aprovado sem antes devolver os produtos ao estoque.'
@@ -221,8 +219,6 @@ class OrcamentoService {
 
       if (novoStatus === 'Aprovado') {
 
-        // Busca somente os produtos.
-        // Serviços não possuem movimentação de estoque.
         const produtosResult = await client.query(
           `
           SELECT
@@ -257,7 +253,6 @@ class OrcamentoService {
             )
           }
 
-          // Retira a quantidade do estoque.
           const updateEstoque = await client.query(
             `
             UPDATE produtos
@@ -275,7 +270,6 @@ class OrcamentoService {
             )
           }
 
-          // Registra a saída no histórico.
           await client.query(
             `
             INSERT INTO movimentacoes_estoque (
@@ -299,11 +293,11 @@ class OrcamentoService {
 
       await client.query(
         `
-      UPDATE dados_orcamento
-      SET status = $1,
-      data_resposta = NOW()
-      WHERE numero_orcamento = $2
-      AND usuario_id = $3
+        UPDATE dados_orcamento
+        SET status = $1,
+            data_resposta = NOW()
+        WHERE numero_orcamento = $2
+          AND usuario_id = $3
         `,
         [novoStatus, numeroOrcamento, usuarioId]
       )
@@ -319,7 +313,6 @@ class OrcamentoService {
 
     } catch (error) {
       await client.query('ROLLBACK')
-
       throw error
 
     } finally {
@@ -429,20 +422,22 @@ class OrcamentoService {
       .replace('{{items}}', itemsHtml)
       .replace('{{total}}', total.toFixed(2))
 
-    console.log('===== TESTE PUPPETE RAILWAY =====')
-    console.log('Executável:', puppeteer.executablePath())
-
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage'
-      ],
-      dumpio: true
-    })
+    let browser
 
     try {
+      console.log('===== INICIANDO CHROMIUM NO RAILWAY =====')
+
+      const executablePath = await chromium.executablePath()
+
+      console.log('Executável Chromium:', executablePath)
+
+      browser = await puppeteer.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath,
+        headless: chromium.headless,
+      })
+
       const page = await browser.newPage()
 
       await page.setContent(html, {
@@ -456,8 +451,14 @@ class OrcamentoService {
 
       return pdf
 
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error)
+      throw error
+
     } finally {
-      await browser.close()
+      if (browser) {
+        await browser.close()
+      }
     }
   }
 }
