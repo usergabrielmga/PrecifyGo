@@ -1,20 +1,76 @@
+
 const ProdutoModel = require("../models/produtos.model");
+
+function obterUsuarioId(request) {
+  const id = Number(request.user?.id);
+
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+function obterIdProduto(request) {
+  const id = Number(request.params.id);
+
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+function validarProduto(body, exigirEstoque = true) {
+  const {
+    nome,
+    descricao,
+    preco,
+    estoque,
+    ativo
+  } = body || {};
+
+  if (
+    typeof nome !== "string" ||
+    !nome.trim() ||
+    preco === undefined ||
+    (exigirEstoque && estoque === undefined)
+  ) {
+    return "Nome, preço e estoque são obrigatórios";
+  }
+
+  if (
+    !Number.isFinite(Number(preco)) ||
+    Number(preco) < 0
+  ) {
+    return "Preço inválido";
+  }
+
+  if (
+    exigirEstoque &&
+    (
+      !Number.isInteger(Number(estoque)) ||
+      Number(estoque) < 0
+    )
+  ) {
+    return "Estoque deve ser um número inteiro não negativo";
+  }
+
+  if (
+    ativo !== undefined &&
+    typeof ativo !== "boolean"
+  ) {
+    return "O campo ativo deve ser booleano";
+  }
+
+  if (
+    descricao !== undefined &&
+    descricao !== null &&
+    typeof descricao !== "string"
+  ) {
+    return "Descrição inválida";
+  }
+
+  return null;
+}
 
 class ProdutoController {
 
-  static obterUsuarioId(request) {
-    const usuarioId = Number(request.user?.id);
-
-    if (!Number.isInteger(usuarioId) || usuarioId <= 0) {
-      return null;
-    }
-
-    return usuarioId;
-  }
-
   static async listar(request, reply) {
     try {
-      const usuarioId = this.obterUsuarioId(request);
+      const usuarioId = obterUsuarioId(request);
 
       if (!usuarioId) {
         return reply.code(401).send({
@@ -37,8 +93,8 @@ class ProdutoController {
 
   static async buscarPorId(request, reply) {
     try {
-      const usuarioId = this.obterUsuarioId(request);
-      const { id } = request.params;
+      const usuarioId = obterUsuarioId(request);
+      const id = obterIdProduto(request);
 
       if (!usuarioId) {
         return reply.code(401).send({
@@ -46,7 +102,16 @@ class ProdutoController {
         });
       }
 
-      const produto = await ProdutoModel.buscarPorId(id, usuarioId);
+      if (!id) {
+        return reply.code(400).send({
+          error: "ID do produto inválido"
+        });
+      }
+
+      const produto = await ProdutoModel.buscarPorId(
+        id,
+        usuarioId
+      );
 
       if (!produto) {
         return reply.code(404).send({
@@ -67,12 +132,18 @@ class ProdutoController {
 
   static async criar(request, reply) {
     try {
-      const usuarioId = this.obterUsuarioId(request);
+      const usuarioId = obterUsuarioId(request);
 
       if (!usuarioId) {
         return reply.code(401).send({
           error: "Usuário não autenticado"
         });
+      }
+
+      const erro = validarProduto(request.body);
+
+      if (erro) {
+        return reply.code(400).send({ error: erro });
       }
 
       const {
@@ -83,36 +154,12 @@ class ProdutoController {
         ativo
       } = request.body;
 
-      if (!nome || preco === undefined || estoque === undefined) {
-        return reply.code(400).send({
-          error: "Nome, preço e estoque são obrigatórios"
-        });
-      }
-
-      if (
-        !Number.isFinite(Number(preco)) ||
-        Number(preco) < 0
-      ) {
-        return reply.code(400).send({
-          error: "O preço deve ser um número válido e não negativo"
-        });
-      }
-
-      if (
-        !Number.isInteger(Number(estoque)) ||
-        Number(estoque) < 0
-      ) {
-        return reply.code(400).send({
-          error: "O estoque deve ser um número inteiro não negativo"
-        });
-      }
-
       const produto = await ProdutoModel.criar({
-        nome,
+        nome: nome.trim(),
         descricao,
         preco: Number(preco),
         estoque: Number(estoque),
-        ativo: ativo !== undefined ? ativo : true,
+        ativo: ativo ?? true,
         usuarioId
       });
 
@@ -129,8 +176,8 @@ class ProdutoController {
 
   static async atualizar(request, reply) {
     try {
-      const usuarioId = this.obterUsuarioId(request);
-      const { id } = request.params;
+      const usuarioId = obterUsuarioId(request);
+      const id = obterIdProduto(request);
 
       if (!usuarioId) {
         return reply.code(401).send({
@@ -138,15 +185,16 @@ class ProdutoController {
         });
       }
 
-      const produtoExistente = await ProdutoModel.buscarPorId(
-        id,
-        usuarioId
-      );
-
-      if (!produtoExistente) {
-        return reply.code(404).send({
-          error: "Produto não encontrado"
+      if (!id) {
+        return reply.code(400).send({
+          error: "ID do produto inválido"
         });
+      }
+
+      const erro = validarProduto(request.body);
+
+      if (erro) {
+        return reply.code(400).send({ error: erro });
       }
 
       const {
@@ -157,36 +205,12 @@ class ProdutoController {
         ativo
       } = request.body;
 
-      if (!nome || preco === undefined || estoque === undefined) {
-        return reply.code(400).send({
-          error: "Nome, preço e estoque são obrigatórios"
-        });
-      }
-
-      if (
-        !Number.isFinite(Number(preco)) ||
-        Number(preco) < 0
-      ) {
-        return reply.code(400).send({
-          error: "O preço deve ser um número válido e não negativo"
-        });
-      }
-
-      if (
-        !Number.isInteger(Number(estoque)) ||
-        Number(estoque) < 0
-      ) {
-        return reply.code(400).send({
-          error: "O estoque deve ser um número inteiro não negativo"
-        });
-      }
-
       const produto = await ProdutoModel.atualizar(id, {
-        nome,
+        nome: nome.trim(),
         descricao,
         preco: Number(preco),
         estoque: Number(estoque),
-        ativo: ativo !== undefined ? ativo : true,
+        ativo: ativo ?? true,
         usuarioId
       });
 
@@ -209,12 +233,18 @@ class ProdutoController {
 
   static async excluir(request, reply) {
     try {
-      const usuarioId = this.obterUsuarioId(request);
-      const { id } = request.params;
+      const usuarioId = obterUsuarioId(request);
+      const id = obterIdProduto(request);
 
       if (!usuarioId) {
         return reply.code(401).send({
           error: "Usuário não autenticado"
+        });
+      }
+
+      if (!id) {
+        return reply.code(400).send({
+          error: "ID do produto inválido"
         });
       }
 
@@ -232,6 +262,12 @@ class ProdutoController {
       });
 
     } catch (error) {
+      if (error.code === "23503") {
+        return reply.code(409).send({
+          error: "Este produto possui movimentações ou está vinculado a orçamentos e não pode ser excluído."
+        });
+      }
+
       console.error("Erro ao excluir produto:", error);
 
       return reply.code(500).send({
@@ -242,9 +278,9 @@ class ProdutoController {
 
   static async registrarEntradaEstoque(request, reply) {
     try {
-      const usuarioId = this.obterUsuarioId(request);
-      const { id } = request.params;
-      const { quantidade } = request.body;
+      const usuarioId = obterUsuarioId(request);
+      const id = obterIdProduto(request);
+      const { quantidade } = request.body || {};
 
       if (!usuarioId) {
         return reply.code(401).send({
@@ -252,13 +288,18 @@ class ProdutoController {
         });
       }
 
+      if (!id) {
+        return reply.code(400).send({
+          error: "ID do produto inválido"
+        });
+      }
+
       if (
-        quantidade === undefined ||
         !Number.isInteger(Number(quantidade)) ||
         Number(quantidade) <= 0
       ) {
         return reply.code(400).send({
-          error: "A quantidade deve ser um número inteiro maior que zero"
+          error: "Quantidade deve ser um número inteiro maior que zero"
         });
       }
 
@@ -280,7 +321,7 @@ class ProdutoController {
         });
       }
 
-      console.error("Erro ao registrar entrada de estoque:", error);
+      console.error("Erro ao registrar entrada:", error);
 
       return reply.code(500).send({
         error: "Erro ao registrar entrada de estoque"

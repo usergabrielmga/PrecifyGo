@@ -1,3 +1,4 @@
+
 const ServicoController = require("../controllers/servicos.controller");
 
 async function servicosRoutes(fastify) {
@@ -21,7 +22,6 @@ async function servicosRoutes(fastify) {
   fastify.delete("/:id", {
     preHandler: [fastify.authenticate]
   }, ServicoController.excluir);
-
 }
 
 module.exports = servicosRoutes;

@@ -1,10 +1,10 @@
+
 const db = require("../config/database");
 
 class ServicoModel {
 
   static async listar(usuarioId) {
-    const result = await db.query(
-      `
+    const result = await db.query(`
       SELECT
         id_servico,
         nome,
@@ -15,16 +15,13 @@ class ServicoModel {
       FROM servicos
       WHERE usuario_id = $1
       ORDER BY id_servico DESC
-      `,
-      [usuarioId]
-    );
+    `, [usuarioId]);
 
     return result.rows;
   }
 
   static async buscarPorId(id, usuarioId) {
-    const result = await db.query(
-      `
+    const result = await db.query(`
       SELECT
         id_servico,
         nome,
@@ -35,11 +32,9 @@ class ServicoModel {
       FROM servicos
       WHERE id_servico = $1
       AND usuario_id = $2
-      `,
-      [id, usuarioId]
-    );
+    `, [id, usuarioId]);
 
-    return result.rows[0];
+    return result.rows[0] || null;
   }
 
   static async criar({
@@ -49,8 +44,7 @@ class ServicoModel {
     ativo = true,
     usuarioId
   }) {
-    const result = await db.query(
-      `
+    const result = await db.query(`
       INSERT INTO servicos (
         nome,
         descricao,
@@ -60,31 +54,25 @@ class ServicoModel {
       )
       VALUES ($1, $2, $3, $4, $5)
       RETURNING *
-      `,
-      [
-        nome,
-        descricao || null,
-        preco,
-        ativo,
-        usuarioId
-      ]
-    );
+    `, [
+      nome,
+      descricao || null,
+      preco,
+      ativo,
+      usuarioId
+    ]);
 
     return result.rows[0];
   }
 
-  static async atualizar(
-    id,
-    {
-      nome,
-      descricao,
-      preco,
-      ativo,
-      usuarioId
-    }
-  ) {
-    const result = await db.query(
-      `
+  static async atualizar(id, {
+    nome,
+    descricao,
+    preco,
+    ativo,
+    usuarioId
+  }) {
+    const result = await db.query(`
       UPDATE servicos
       SET
         nome = $1,
@@ -94,32 +82,27 @@ class ServicoModel {
       WHERE id_servico = $5
       AND usuario_id = $6
       RETURNING *
-      `,
-      [
-        nome,
-        descricao || null,
-        preco,
-        ativo,
-        id,
-        usuarioId
-      ]
-    );
+    `, [
+      nome,
+      descricao || null,
+      preco,
+      ativo,
+      id,
+      usuarioId
+    ]);
 
-    return result.rows[0];
+    return result.rows[0] || null;
   }
 
   static async excluir(id, usuarioId) {
-    const result = await db.query(
-      `
+    const result = await db.query(`
       DELETE FROM servicos
       WHERE id_servico = $1
       AND usuario_id = $2
       RETURNING *
-      `,
-      [id, usuarioId]
-    );
+    `, [id, usuarioId]);
 
-    return result.rows[0];
+    return result.rows[0] || null;
   }
 }
 

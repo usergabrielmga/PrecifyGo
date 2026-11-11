@@ -1,3 +1,4 @@
+
 const ProdutoController = require("../controllers/produtos.controller");
 
 async function produtosRoutes(fastify) {
@@ -25,7 +26,6 @@ async function produtosRoutes(fastify) {
   fastify.delete("/:id", {
     preHandler: [fastify.authenticate]
   }, ProdutoController.excluir);
-
 }
 
 module.exports = produtosRoutes;
