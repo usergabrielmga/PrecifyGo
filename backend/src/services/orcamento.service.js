@@ -1,13 +1,14 @@
 
-const pool = require('../config/database')
-const ClienteModel = require('../models/cliente.model')
-const OrcamentoModel = require('../models/orcamento.model')
-const ItemModel = require('../models/item.model')
-const EmissorModel = require('../models/emissor.model')
+const pool = require('../config/database');
 
-const fs = require('fs')
-const path = require('path')
-const crypto = require('crypto')
+const ClienteModel = require('../models/cliente.model');
+const OrcamentoModel = require('../models/orcamento.model');
+const ItemModel = require('../models/item.model');
+const EmissorModel = require('../models/emissor.model');
+
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
 
 class OrcamentoService {
 
@@ -15,17 +16,21 @@ class OrcamentoService {
 
   static async create(data, usuarioId) {
     if (!data) {
-      throw new Error('Body vazio')
+      throw new Error('Body vazio');
+    }
+
+    if (!usuarioId) {
+      throw new Error('Usuário não identificado');
     }
 
     if (!Array.isArray(data.itens) || data.itens.length === 0) {
-      throw new Error('Orçamento precisa ter ao menos um item')
+      throw new Error('Orçamento precisa ter ao menos um item');
     }
 
-    const client = await pool.connect()
+    const client = await pool.connect();
 
     try {
-      await client.query('BEGIN')
+      await client.query('BEGIN');
 
       const emissorData = {
         nome: data.nome,
@@ -33,14 +38,15 @@ class OrcamentoService {
         endereco: data.endereco ?? null,
         telefone: data.telefone ?? null,
         email: data.email ?? null,
-        LogoTipo: data.logo ?? null,
-      }
+        logotipo: data.logo ?? null
+      };
 
+      // Emissor vinculado ao usuário autenticado
       const emissorId = await EmissorModel.create(
         emissorData,
-        client,
-        usuarioId
-      )
+        usuarioId,
+        client
+      );
 
       const clienteData = {
         nome: data.nomeClient?.trim(),
@@ -49,26 +55,26 @@ class OrcamentoService {
           : null,
         endereco: data.enderecoClient?.trim() ?? null,
         telefone: data.telefoneClient?.trim() ?? null,
-        email: data.emailClient?.trim() ?? null,
-      }
+        email: data.emailClient?.trim() ?? null
+      };
 
       let clienteId = await ClienteModel.findByCpfCnpj(
         clienteData.cpf_cnpj,
         client,
         usuarioId
-      )
+      );
 
       if (!clienteId) {
         clienteId = await ClienteModel.create(
           clienteData,
           client,
           usuarioId
-        )
+        );
       }
 
-      console.log('Cliente ID final:', clienteId)
+      console.log('Cliente ID final:', clienteId);
 
-      const tokenPublico = crypto.randomBytes(32).toString('hex')
+      const tokenPublico = crypto.randomBytes(32).toString('hex');
 
       const orcamentoData = {
         formaPagamento: data.formaPagamento ?? null,
@@ -80,16 +86,16 @@ class OrcamentoService {
         observacoes: data.observacoes ?? null,
         Emissor_Id_emissor: emissorId,
         Cliente_Id_cliente: clienteId,
-        tokenPublico,
-      }
+        tokenPublico
+      };
 
       const numeroOrcamento = await OrcamentoModel.create(
         orcamentoData,
         client,
         usuarioId
-      )
+      );
 
-      console.log('Número do orçamento:', numeroOrcamento)
+      console.log('Número do orçamento:', numeroOrcamento);
 
       for (const item of data.itens) {
         await ItemModel.create(
@@ -98,85 +104,86 @@ class OrcamentoService {
             produto_id: item.produtoId ?? null,
             servico_id: item.servicoId ?? null,
             quantidade: Number(item.quantidade) || 1,
-            valor_unitario: Number(item.valorUnitario) || 0,
+            valor_unitario: Number(item.valorUnitario) || 0
           },
           client
-        )
+        );
       }
 
-      await client.query('COMMIT')
+      await client.query('COMMIT');
 
       return {
         clienteId,
         emissorId,
         numero_orcamento: numeroOrcamento,
-        tokenPublico,
-      }
+        tokenPublico
+      };
 
     } catch (error) {
-      await client.query('ROLLBACK')
-      console.error('Erro ao criar orçamento:', error)
-      throw error
+      await client.query('ROLLBACK');
+      console.error('Erro ao criar orçamento:', error);
+      throw error;
 
     } finally {
-      client.release()
+      client.release();
     }
   }
 
   // ================= LISTAR ORÇAMENTOS =================
 
   static async getAll(usuarioId) {
-    const client = await pool.connect()
+    const client = await pool.connect();
 
     try {
       return await OrcamentoModel.findAllForModal(
         client,
         usuarioId
-      )
+      );
+
     } finally {
-      client.release()
+      client.release();
     }
   }
 
   // ================= BUSCAR ORÇAMENTO POR ID =================
 
   static async getById(id) {
-    const client = await pool.connect()
+    const client = await pool.connect();
 
     try {
       const data = await OrcamentoModel.findCompleteById(
         id,
         client
-      )
+      );
 
       if (!data) {
-        throw new Error('Orçamento não encontrado')
+        throw new Error('Orçamento não encontrado');
       }
 
-      return data
+      return data;
 
     } finally {
-      client.release()
+      client.release();
     }
   }
 
   // ================= ATUALIZAR STATUS E ESTOQUE =================
 
   static async updateStatus(numeroOrcamento, novoStatus, usuarioId) {
-    const client = await pool.connect()
+    const client = await pool.connect();
 
     try {
-      await client.query('BEGIN')
+      await client.query('BEGIN');
 
       const statusPermitidos = [
         'Pendente',
         'Aprovado',
         'Recusado',
         'Cancelado'
-      ]
+      ];
 
       if (!statusPermitidos.includes(novoStatus)) {
-        throw new Error('Status inválido')
+        throw new Error('Status inválido');
       }
 
       const budgetResult = await client.query(
@@ -188,27 +195,27 @@ class OrcamentoService {
         FOR UPDATE
         `,
         [numeroOrcamento, usuarioId]
-      )
+      );
 
       if (budgetResult.rows.length === 0) {
-        throw new Error('Orçamento não encontrado')
+        throw new Error('Orçamento não encontrado');
       }
 
-      const statusAtual = budgetResult.rows[0].status
+      const statusAtual = budgetResult.rows[0].status;
 
       if (statusAtual === novoStatus) {
-        await client.query('COMMIT')
+        await client.query('COMMIT');
 
         return {
           status: statusAtual,
           message: 'O orçamento já está com esse status.'
-        }
+        };
       }
 
       if (statusAtual === 'Aprovado' && novoStatus !== 'Aprovado') {
         throw new Error(
           'Não é possível alterar o status de um orçamento aprovado sem antes devolver os produtos ao estoque.'
-        )
+        );
       }
 
       // ================= BAIXA DE ESTOQUE =================
@@ -230,23 +237,23 @@ class OrcamentoService {
           FOR UPDATE OF p
           `,
           [numeroOrcamento]
-        )
+        );
 
         for (const item of produtosResult.rows) {
 
-          const quantidade = Number(item.quantidade)
-          const estoqueAtual = Number(item.estoque)
+          const quantidade = Number(item.quantidade);
+          const estoqueAtual = Number(item.estoque);
 
           if (!Number.isInteger(quantidade) || quantidade <= 0) {
             throw new Error(
               `Quantidade inválida para o produto ${item.nome}.`
-            )
+            );
           }
 
           if (estoqueAtual < quantidade) {
             throw new Error(
               `Estoque insuficiente para o produto "${item.nome}". Disponível: ${estoqueAtual}. Necessário: ${quantidade}.`
-            )
+            );
           }
 
           const updateEstoque = await client.query(
@@ -258,12 +265,12 @@ class OrcamentoService {
             RETURNING estoque
             `,
             [quantidade, item.produto_id]
-          )
+          );
 
           if (updateEstoque.rows.length === 0) {
             throw new Error(
               `Não foi possível atualizar o estoque do produto ${item.nome}.`
-            )
+            );
           }
 
           await client.query(
@@ -281,7 +288,7 @@ class OrcamentoService {
               quantidade,
               `Baixa automática pelo orçamento #${numeroOrcamento}`
             ]
-          )
+          );
         }
       }
 
@@ -296,33 +303,33 @@ class OrcamentoService {
           AND usuario_id = $3
         `,
         [novoStatus, numeroOrcamento, usuarioId]
-      )
+      );
 
-      await client.query('COMMIT')
+      await client.query('COMMIT');
 
       return {
         status: novoStatus,
         message: novoStatus === 'Aprovado'
           ? 'Orçamento aprovado e estoque atualizado com sucesso.'
           : 'Status do orçamento atualizado com sucesso.'
-      }
+      };
 
     } catch (error) {
-      await client.query('ROLLBACK')
-      throw error
+      await client.query('ROLLBACK');
+      throw error;
 
     } finally {
-      client.release()
+      client.release();
     }
   }
 
   // ================= EXCLUIR ORÇAMENTO =================
 
   static async delete(numeroOrcamento, usuarioId) {
-    const client = await pool.connect()
+    const client = await pool.connect();
 
     try {
-      await client.query('BEGIN')
+      await client.query('BEGIN');
 
       const budget = await client.query(
         `
@@ -333,16 +340,16 @@ class OrcamentoService {
         FOR UPDATE
         `,
         [numeroOrcamento, usuarioId]
-      )
+      );
 
       if (budget.rows.length === 0) {
-        throw new Error('Orçamento não encontrado')
+        throw new Error('Orçamento não encontrado');
       }
 
       if (budget.rows[0].status === 'Aprovado') {
         throw new Error(
           'Não é possível excluir um orçamento aprovado sem antes devolver os produtos ao estoque.'
-        )
+        );
       }
 
       await client.query(
@@ -351,7 +358,7 @@ class OrcamentoService {
         WHERE dados_orcamento_numero_orcamento = $1
         `,
         [numeroOrcamento]
-      )
+      );
 
       await client.query(
         `
@@ -360,41 +367,41 @@ class OrcamentoService {
           AND usuario_id = $2
         `,
         [numeroOrcamento, usuarioId]
-      )
+      );
 
-      await client.query('COMMIT')
+      await client.query('COMMIT');
 
     } catch (error) {
-      await client.query('ROLLBACK')
-      throw error
+      await client.query('ROLLBACK');
+      throw error;
 
     } finally {
-      client.release()
+      client.release();
     }
   }
 
   // ================= GERAR PDF =================
 
   static async generatePdf(id) {
-    const { budget, items, total } = await this.getById(id)
+    const { budget, items, total } = await this.getById(id);
 
     const templatePath = path.resolve(
       __dirname,
       '../../templates/orcamento.html'
-    )
+    );
 
-    console.log('Caminho do template:', templatePath)
-    console.log('Template existe?', fs.existsSync(templatePath))
+    console.log('Caminho do template:', templatePath);
+    console.log('Template existe?', fs.existsSync(templatePath));
 
     if (!fs.existsSync(templatePath)) {
-      throw new Error(`Template não encontrado: ${templatePath}`)
+      throw new Error(`Template não encontrado: ${templatePath}`);
     }
 
-    let html = fs.readFileSync(templatePath, 'utf-8')
+    let html = fs.readFileSync(templatePath, 'utf-8');
 
     const itemsHtml = items.map((item) => {
-      const unit = Number(item.valor_unitario)
-      const totalItem = Number(item.total_item)
+      const unit = Number(item.valor_unitario);
+      const totalItem = Number(item.total_item);
 
       return `
         <tr>
@@ -403,8 +410,8 @@ class OrcamentoService {
           <td>R$ ${unit.toFixed(2)}</td>
           <td>R$ ${totalItem.toFixed(2)}</td>
         </tr>
-      `
-    }).join('')
+      `;
+    }).join('');
 
     html = html
       .replace('{{logo}}', budget.emissor_logo || '')
@@ -416,56 +423,56 @@ class OrcamentoService {
       .replace('{{cliente_email}}', budget.cliente_email || '')
       .replace('{{cliente_telefone}}', budget.cliente_telefone || '')
       .replace('{{items}}', itemsHtml)
-      .replace('{{total}}', total.toFixed(2))
+      .replace('{{total}}', total.toFixed(2));
 
-    let browser
+    let browser;
 
     try {
-      console.log('===== INICIANDO CHROMIUM NA VERCEL =====')
+      console.log('===== INICIANDO CHROMIUM NA VERCEL =====');
 
       // Importação dinâmica dos dois pacotes ESM
       const [chromiumModule, puppeteerModule] = await Promise.all([
         import('@sparticuz/chromium'),
         import('puppeteer-core')
-      ])
+      ]);
 
-      const chromium = chromiumModule.default
-      const puppeteer = puppeteerModule.default
+      const chromium = chromiumModule.default;
+      const puppeteer = puppeteerModule.default;
 
-      const executablePath = await chromium.executablePath()
+      const executablePath = await chromium.executablePath();
 
-      console.log('Executável Chromium:', executablePath)
+      console.log('Executável Chromium:', executablePath);
 
       browser = await puppeteer.launch({
         args: chromium.args,
         defaultViewport: chromium.defaultViewport,
         executablePath,
-        headless: chromium.headless,
-      })
+        headless: chromium.headless
+      });
 
-      const page = await browser.newPage()
+      const page = await browser.newPage();
 
       await page.setContent(html, {
-        waitUntil: 'networkidle0',
-      })
+        waitUntil: 'networkidle0'
+      });
 
       const pdf = await page.pdf({
         format: 'A4',
-        printBackground: true,
-      })
+        printBackground: true
+      });
 
-      return pdf
+      return pdf;
 
     } catch (error) {
-      console.error('Erro ao gerar PDF:', error)
-      throw error
+      console.error('Erro ao gerar PDF:', error);
+      throw error;
 
     } finally {
       if (browser) {
-        await browser.close()
+        await browser.close();
       }
     }
   }
 }
 
-module.exports = OrcamentoService
+module.exports = OrcamentoService;

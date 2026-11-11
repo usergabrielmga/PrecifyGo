@@ -1,12 +1,21 @@
+
 class EmissorModel {
-  static async create(data, conn) {
-    const normalize = v => (v === undefined ? null : v)
+  static async create(data, usuarioId, conn) {
+    const normalize = v => (v === undefined ? null : v);
 
     const result = await conn.query(
       `
       INSERT INTO emissor
-      (nome, email, telefone, endereco, cpf_cnpj, logotipo)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      (
+        nome,
+        email,
+        telefone,
+        endereco,
+        cpf_cnpj,
+        logotipo,
+        usuario_id
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING id_emissor
       `,
       [
@@ -15,12 +24,13 @@ class EmissorModel {
         normalize(data.telefone),
         normalize(data.endereco),
         data.cpf_cnpj,
-        normalize(data.logotipo)
+        normalize(data.logotipo),
+        usuarioId
       ]
-    )
+    );
 
-    return result.rows[0].id_emissor
+    return result.rows[0].id_emissor;
   }
 }
 
-module.exports = EmissorModel
+module.exports = EmissorModel;
