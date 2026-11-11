@@ -10,9 +10,23 @@ export type Servico = {
 
 const API_URL = "https://precify-go-3tri.vercel.app/servicos";
 
+function obterHeaders() {
+  const token = localStorage.getItem("token");
+
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
 async function verificarResposta(response: Response) {
   if (!response.ok) {
     const erro = await response.json().catch(() => null);
+
+    if (response.status === 401) {
+      throw new Error("Não autorizado. Faça login novamente.");
+    }
+
     throw new Error(erro?.error || "Erro ao comunicar com a API");
   }
 
@@ -20,7 +34,13 @@ async function verificarResposta(response: Response) {
 }
 
 export async function listarServicos(): Promise<Servico[]> {
-  const response = await verificarResposta(await fetch(API_URL));
+  const response = await verificarResposta(
+    await fetch(API_URL, {
+      method: "GET",
+      headers: obterHeaders(),
+    })
+  );
+
   return response.json();
 }
 
@@ -30,9 +50,7 @@ export async function criarServico(
   const response = await verificarResposta(
     await fetch(API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: obterHeaders(),
       body: JSON.stringify(servico),
     })
   );
@@ -47,9 +65,7 @@ export async function atualizarServico(
   const response = await verificarResposta(
     await fetch(`${API_URL}/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: obterHeaders(),
       body: JSON.stringify(servico),
     })
   );
@@ -61,6 +77,7 @@ export async function excluirServico(id: number): Promise<void> {
   await verificarResposta(
     await fetch(`${API_URL}/${id}`, {
       method: "DELETE",
+      headers: obterHeaders(),
     })
   );
 }
