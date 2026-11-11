@@ -6,13 +6,7 @@ const EmissorModel = require('../models/emissor.model')
 
 const fs = require('fs')
 const path = require('path')
-const puppeteer = process.env.VERCEL
-  ? require('puppeteer-core')
-  : require('puppeteer')
-
-const chromium = process.env.VERCEL
-  ? require('@sparticuz/chromium')
-  : null
+const puppeteer = require('puppeteer')
 const crypto = require('crypto')
 
 class OrcamentoService {
@@ -395,16 +389,17 @@ class OrcamentoService {
   static async generatePdf(id) {
     const { budget, items, total } = await this.getById(id)
 
-    const templatePath = path.join(
-      process.cwd(),
-      'templates',
-      'orcamento.html'
+    const templatePath = path.resolve(
+      __dirname,
+      '../../templates/orcamento.html'
     )
+
+    console.log('Caminho do template:', templatePath)
+    console.log('Template existe?', fs.existsSync(templatePath))
 
     if (!fs.existsSync(templatePath)) {
       throw new Error(`Template não encontrado: ${templatePath}`)
     }
-
 
     let html = fs.readFileSync(templatePath, 'utf-8')
 
@@ -437,23 +432,15 @@ class OrcamentoService {
     console.log('===== TESTE PUPPETE RAILWAY =====')
     console.log('Executável:', puppeteer.executablePath())
 
-    const browser = await puppeteer.launch(
-  process.env.VERCEL
-    ? {
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
-        headless: chromium.headless,
-      }
-    : {
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage'
-        ]
-      }
-)
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage'
+      ],
+      dumpio: true
+    })
 
     try {
       const page = await browser.newPage()
