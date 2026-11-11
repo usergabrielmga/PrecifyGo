@@ -423,8 +423,11 @@ class OrcamentoService {
     try {
       console.log('===== INICIANDO CHROMIUM NA VERCEL =====')
 
-      // Carrega as bibliotecas somente quando um PDF for solicitado
-      const chromium = require('@sparticuz/chromium')
+      // Importação dinâmica: compatível com CommonJS e pacote ESM
+      const chromiumModule = await import('@sparticuz/chromium')
+      const chromium = chromiumModule.default
+
+      // Puppeteer continua utilizando CommonJS
       const puppeteer = require('puppeteer-core')
 
       const executablePath = await chromium.executablePath()
