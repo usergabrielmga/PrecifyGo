@@ -2,17 +2,29 @@ const ProdutoController = require("../controllers/produtos.controller");
 
 async function produtosRoutes(fastify) {
 
-  fastify.get("/", ProdutoController.listar);
+  fastify.get("/", {
+    preHandler: [fastify.authenticate]
+  }, ProdutoController.listar);
 
-  fastify.get("/:id", ProdutoController.buscarPorId);
+  fastify.get("/:id", {
+    preHandler: [fastify.authenticate]
+  }, ProdutoController.buscarPorId);
 
-  fastify.post("/", ProdutoController.criar);
+  fastify.post("/", {
+    preHandler: [fastify.authenticate]
+  }, ProdutoController.criar);
 
-  fastify.post("/:id/entrada", ProdutoController.registrarEntradaEstoque);
+  fastify.post("/:id/entrada", {
+    preHandler: [fastify.authenticate]
+  }, ProdutoController.registrarEntradaEstoque);
 
-  fastify.put("/:id", ProdutoController.atualizar);
+  fastify.put("/:id", {
+    preHandler: [fastify.authenticate]
+  }, ProdutoController.atualizar);
 
-  fastify.delete("/:id", ProdutoController.excluir);
+  fastify.delete("/:id", {
+    preHandler: [fastify.authenticate]
+  }, ProdutoController.excluir);
 
 }
 

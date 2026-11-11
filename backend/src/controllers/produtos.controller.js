@@ -2,9 +2,27 @@ const ProdutoModel = require("../models/produtos.model");
 
 class ProdutoController {
 
+  static obterUsuarioId(request) {
+    const usuarioId = Number(request.user?.id);
+
+    if (!Number.isInteger(usuarioId) || usuarioId <= 0) {
+      return null;
+    }
+
+    return usuarioId;
+  }
+
   static async listar(request, reply) {
     try {
-      const produtos = await ProdutoModel.listar();
+      const usuarioId = this.obterUsuarioId(request);
+
+      if (!usuarioId) {
+        return reply.code(401).send({
+          error: "Usuário não autenticado"
+        });
+      }
+
+      const produtos = await ProdutoModel.listar(usuarioId);
 
       return reply.send(produtos);
 
@@ -19,9 +37,16 @@ class ProdutoController {
 
   static async buscarPorId(request, reply) {
     try {
+      const usuarioId = this.obterUsuarioId(request);
       const { id } = request.params;
 
-      const produto = await ProdutoModel.buscarPorId(id);
+      if (!usuarioId) {
+        return reply.code(401).send({
+          error: "Usuário não autenticado"
+        });
+      }
+
+      const produto = await ProdutoModel.buscarPorId(id, usuarioId);
 
       if (!produto) {
         return reply.code(404).send({
@@ -42,6 +67,14 @@ class ProdutoController {
 
   static async criar(request, reply) {
     try {
+      const usuarioId = this.obterUsuarioId(request);
+
+      if (!usuarioId) {
+        return reply.code(401).send({
+          error: "Usuário não autenticado"
+        });
+      }
+
       const {
         nome,
         descricao,
@@ -56,15 +89,21 @@ class ProdutoController {
         });
       }
 
-      if (Number(preco) < 0) {
+      if (
+        !Number.isFinite(Number(preco)) ||
+        Number(preco) < 0
+      ) {
         return reply.code(400).send({
-          error: "O preço não pode ser negativo"
+          error: "O preço deve ser um número válido e não negativo"
         });
       }
 
-      if (Number(estoque) < 0) {
+      if (
+        !Number.isInteger(Number(estoque)) ||
+        Number(estoque) < 0
+      ) {
         return reply.code(400).send({
-          error: "O estoque não pode ser negativo"
+          error: "O estoque deve ser um número inteiro não negativo"
         });
       }
 
@@ -73,7 +112,8 @@ class ProdutoController {
         descricao,
         preco: Number(preco),
         estoque: Number(estoque),
-        ativo: ativo !== undefined ? ativo : true
+        ativo: ativo !== undefined ? ativo : true,
+        usuarioId
       });
 
       return reply.code(201).send(produto);
@@ -89,9 +129,19 @@ class ProdutoController {
 
   static async atualizar(request, reply) {
     try {
+      const usuarioId = this.obterUsuarioId(request);
       const { id } = request.params;
 
-      const produtoExistente = await ProdutoModel.buscarPorId(id);
+      if (!usuarioId) {
+        return reply.code(401).send({
+          error: "Usuário não autenticado"
+        });
+      }
+
+      const produtoExistente = await ProdutoModel.buscarPorId(
+        id,
+        usuarioId
+      );
 
       if (!produtoExistente) {
         return reply.code(404).send({
@@ -113,15 +163,21 @@ class ProdutoController {
         });
       }
 
-      if (Number(preco) < 0) {
+      if (
+        !Number.isFinite(Number(preco)) ||
+        Number(preco) < 0
+      ) {
         return reply.code(400).send({
-          error: "O preço não pode ser negativo"
+          error: "O preço deve ser um número válido e não negativo"
         });
       }
 
-      if (Number(estoque) < 0) {
+      if (
+        !Number.isInteger(Number(estoque)) ||
+        Number(estoque) < 0
+      ) {
         return reply.code(400).send({
-          error: "O estoque não pode ser negativo"
+          error: "O estoque deve ser um número inteiro não negativo"
         });
       }
 
@@ -130,8 +186,15 @@ class ProdutoController {
         descricao,
         preco: Number(preco),
         estoque: Number(estoque),
-        ativo: ativo !== undefined ? ativo : true
+        ativo: ativo !== undefined ? ativo : true,
+        usuarioId
       });
+
+      if (!produto) {
+        return reply.code(404).send({
+          error: "Produto não encontrado"
+        });
+      }
 
       return reply.send(produto);
 
@@ -146,9 +209,16 @@ class ProdutoController {
 
   static async excluir(request, reply) {
     try {
+      const usuarioId = this.obterUsuarioId(request);
       const { id } = request.params;
 
-      const produto = await ProdutoModel.excluir(id);
+      if (!usuarioId) {
+        return reply.code(401).send({
+          error: "Usuário não autenticado"
+        });
+      }
+
+      const produto = await ProdutoModel.excluir(id, usuarioId);
 
       if (!produto) {
         return reply.code(404).send({
@@ -170,11 +240,17 @@ class ProdutoController {
     }
   }
 
-  // Registrar entrada de estoque
   static async registrarEntradaEstoque(request, reply) {
     try {
+      const usuarioId = this.obterUsuarioId(request);
       const { id } = request.params;
       const { quantidade } = request.body;
+
+      if (!usuarioId) {
+        return reply.code(401).send({
+          error: "Usuário não autenticado"
+        });
+      }
 
       if (
         quantidade === undefined ||
@@ -188,7 +264,8 @@ class ProdutoController {
 
       const produto = await ProdutoModel.registrarEntradaEstoque(
         id,
-        Number(quantidade)
+        Number(quantidade),
+        usuarioId
       );
 
       return reply.send({

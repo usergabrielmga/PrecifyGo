@@ -2,9 +2,27 @@ const ServicoModel = require("../models/servicos.model");
 
 class ServicoController {
 
+  static obterUsuarioId(request) {
+    const usuarioId = Number(request.user?.id);
+
+    if (!Number.isInteger(usuarioId) || usuarioId <= 0) {
+      return null;
+    }
+
+    return usuarioId;
+  }
+
   static async listar(request, reply) {
     try {
-      const servicos = await ServicoModel.listar();
+      const usuarioId = this.obterUsuarioId(request);
+
+      if (!usuarioId) {
+        return reply.code(401).send({
+          error: "Usuário não autenticado"
+        });
+      }
+
+      const servicos = await ServicoModel.listar(usuarioId);
 
       return reply.send(servicos);
 
@@ -19,9 +37,16 @@ class ServicoController {
 
   static async buscarPorId(request, reply) {
     try {
+      const usuarioId = this.obterUsuarioId(request);
       const { id } = request.params;
 
-      const servico = await ServicoModel.buscarPorId(id);
+      if (!usuarioId) {
+        return reply.code(401).send({
+          error: "Usuário não autenticado"
+        });
+      }
+
+      const servico = await ServicoModel.buscarPorId(id, usuarioId);
 
       if (!servico) {
         return reply.code(404).send({
@@ -42,6 +67,14 @@ class ServicoController {
 
   static async criar(request, reply) {
     try {
+      const usuarioId = this.obterUsuarioId(request);
+
+      if (!usuarioId) {
+        return reply.code(401).send({
+          error: "Usuário não autenticado"
+        });
+      }
+
       const {
         nome,
         descricao,
@@ -55,9 +88,12 @@ class ServicoController {
         });
       }
 
-      if (Number(preco) < 0) {
+      if (
+        !Number.isFinite(Number(preco)) ||
+        Number(preco) < 0
+      ) {
         return reply.code(400).send({
-          error: "O preço não pode ser negativo"
+          error: "O preço deve ser um número válido e não negativo"
         });
       }
 
@@ -65,7 +101,8 @@ class ServicoController {
         nome,
         descricao,
         preco: Number(preco),
-        ativo: ativo !== undefined ? ativo : true
+        ativo: ativo !== undefined ? ativo : true,
+        usuarioId
       });
 
       return reply.code(201).send(servico);
@@ -81,9 +118,19 @@ class ServicoController {
 
   static async atualizar(request, reply) {
     try {
+      const usuarioId = this.obterUsuarioId(request);
       const { id } = request.params;
 
-      const servicoExistente = await ServicoModel.buscarPorId(id);
+      if (!usuarioId) {
+        return reply.code(401).send({
+          error: "Usuário não autenticado"
+        });
+      }
+
+      const servicoExistente = await ServicoModel.buscarPorId(
+        id,
+        usuarioId
+      );
 
       if (!servicoExistente) {
         return reply.code(404).send({
@@ -104,9 +151,12 @@ class ServicoController {
         });
       }
 
-      if (Number(preco) < 0) {
+      if (
+        !Number.isFinite(Number(preco)) ||
+        Number(preco) < 0
+      ) {
         return reply.code(400).send({
-          error: "O preço não pode ser negativo"
+          error: "O preço deve ser um número válido e não negativo"
         });
       }
 
@@ -114,8 +164,15 @@ class ServicoController {
         nome,
         descricao,
         preco: Number(preco),
-        ativo: ativo !== undefined ? ativo : true
+        ativo: ativo !== undefined ? ativo : true,
+        usuarioId
       });
+
+      if (!servico) {
+        return reply.code(404).send({
+          error: "Serviço não encontrado"
+        });
+      }
 
       return reply.send(servico);
 
@@ -130,9 +187,16 @@ class ServicoController {
 
   static async excluir(request, reply) {
     try {
+      const usuarioId = this.obterUsuarioId(request);
       const { id } = request.params;
 
-      const servico = await ServicoModel.excluir(id);
+      if (!usuarioId) {
+        return reply.code(401).send({
+          error: "Usuário não autenticado"
+        });
+      }
+
+      const servico = await ServicoModel.excluir(id, usuarioId);
 
       if (!servico) {
         return reply.code(404).send({

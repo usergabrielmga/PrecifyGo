@@ -1,7 +1,8 @@
 const db = require("../config/database");
 
 class ProdutoModel {
-  static async listar() {
+
+  static async listar(usuarioId) {
     const result = await db.query(`
       SELECT
         id_produto,
@@ -12,13 +13,14 @@ class ProdutoModel {
         ativo,
         criado_em
       FROM produtos
+      WHERE usuario_id = $1
       ORDER BY id_produto DESC
-    `);
+    `, [usuarioId]);
 
     return result.rows;
   }
 
-  static async buscarPorId(id) {
+  static async buscarPorId(id, usuarioId) {
     const result = await db.query(
       `
       SELECT
@@ -31,14 +33,22 @@ class ProdutoModel {
         criado_em
       FROM produtos
       WHERE id_produto = $1
+      AND usuario_id = $2
       `,
-      [id]
+      [id, usuarioId]
     );
 
     return result.rows[0];
   }
 
-  static async criar({ nome, descricao, preco, estoque, ativo = true }) {
+  static async criar({
+    nome,
+    descricao,
+    preco,
+    estoque,
+    ativo = true,
+    usuarioId
+  }) {
     const result = await db.query(
       `
       INSERT INTO produtos (
@@ -46,9 +56,10 @@ class ProdutoModel {
         descricao,
         preco,
         estoque,
-        ativo
+        ativo,
+        usuario_id
       )
-      VALUES ($1, $2, $3, $4, $5)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
       `,
       [
@@ -56,7 +67,8 @@ class ProdutoModel {
         descricao || null,
         preco,
         estoque,
-        ativo
+        ativo,
+        usuarioId
       ]
     );
 
@@ -65,7 +77,14 @@ class ProdutoModel {
 
   static async atualizar(
     id,
-    { nome, descricao, preco, estoque, ativo }
+    {
+      nome,
+      descricao,
+      preco,
+      estoque,
+      ativo,
+      usuarioId
+    }
   ) {
     const result = await db.query(
       `
@@ -77,6 +96,7 @@ class ProdutoModel {
         estoque = $4,
         ativo = $5
       WHERE id_produto = $6
+      AND usuario_id = $7
       RETURNING *
       `,
       [
@@ -85,28 +105,33 @@ class ProdutoModel {
         preco,
         estoque,
         ativo,
-        id
+        id,
+        usuarioId
       ]
     );
 
     return result.rows[0];
   }
 
-  static async excluir(id) {
+  static async excluir(id, usuarioId) {
     const result = await db.query(
       `
       DELETE FROM produtos
       WHERE id_produto = $1
+      AND usuario_id = $2
       RETURNING *
       `,
-      [id]
+      [id, usuarioId]
     );
 
     return result.rows[0];
   }
 
-  // Registrar entrada de estoque
-  static async registrarEntradaEstoque(id, quantidade) {
+  static async registrarEntradaEstoque(
+    id,
+    quantidade,
+    usuarioId
+  ) {
     const client = await db.connect();
 
     try {
@@ -117,9 +142,10 @@ class ProdutoModel {
         SELECT id_produto, estoque
         FROM produtos
         WHERE id_produto = $1
+        AND usuario_id = $2
         FOR UPDATE
         `,
-        [id]
+        [id, usuarioId]
       );
 
       if (produtoResult.rows.length === 0) {
@@ -131,9 +157,10 @@ class ProdutoModel {
         UPDATE produtos
         SET estoque = estoque + $1
         WHERE id_produto = $2
+        AND usuario_id = $3
         RETURNING *
         `,
-        [quantidade, id]
+        [quantidade, id, usuarioId]
       );
 
       await client.query(
