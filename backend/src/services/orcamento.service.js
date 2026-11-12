@@ -41,7 +41,6 @@ class OrcamentoService {
         logotipo: data.logo ?? null
       };
 
-      // Emissor vinculado ao usuário autenticado
       const emissorId = await EmissorModel.create(
         emissorData,
         usuarioId,
@@ -234,9 +233,10 @@ class OrcamentoService {
             ON p.id_produto = i.produto_id
           WHERE i.dados_orcamento_numero_orcamento = $1
             AND i.produto_id IS NOT NULL
+            AND p.usuario_id = $2
           FOR UPDATE OF p
           `,
-          [numeroOrcamento]
+          [numeroOrcamento, usuarioId]
         );
 
         for (const item of produtosResult.rows) {
@@ -261,10 +261,11 @@ class OrcamentoService {
             UPDATE produtos
             SET estoque = estoque - $1
             WHERE id_produto = $2
+              AND usuario_id = $3
               AND estoque >= $1
             RETURNING estoque
             `,
-            [quantidade, item.produto_id]
+            [quantidade, item.produto_id, usuarioId]
           );
 
           if (updateEstoque.rows.length === 0) {
@@ -273,20 +274,23 @@ class OrcamentoService {
             );
           }
 
+          // Registrar saída vinculada ao usuário autenticado
           await client.query(
             `
             INSERT INTO movimentacoes_estoque (
               produto_id,
               tipo,
               quantidade,
-              observacao
+              observacao,
+              usuario_id
             )
-            VALUES ($1, 'SAIDA', $2, $3)
+            VALUES ($1, 'SAIDA', $2, $3, $4)
             `,
             [
               item.produto_id,
               quantidade,
-              `Baixa automática pelo orçamento #${numeroOrcamento}`
+              `Baixa automática pelo orçamento #${numeroOrcamento}`,
+              usuarioId
             ]
           );
         }
@@ -430,7 +434,6 @@ class OrcamentoService {
     try {
       console.log('===== INICIANDO CHROMIUM NA VERCEL =====');
 
-      // Importação dinâmica dos dois pacotes ESM
       const [chromiumModule, puppeteerModule] = await Promise.all([
         import('@sparticuz/chromium'),
         import('puppeteer-core')
