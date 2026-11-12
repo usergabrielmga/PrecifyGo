@@ -1,4 +1,3 @@
-
 const pool = require('../config/database');
 
 const ClienteModel = require('../models/cliente.model');
@@ -10,11 +9,22 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
+// Escapa valores antes de inserir no HTML.
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 class OrcamentoService {
 
   // ================= CRIAR ORÇAMENTO =================
 
   static async create(data, usuarioId) {
+
     if (!data) {
       throw new Error('Body vazio');
     }
@@ -30,7 +40,10 @@ class OrcamentoService {
     const client = await pool.connect();
 
     try {
+
       await client.query('BEGIN');
+
+      // ================= EMISSOR =================
 
       const emissorData = {
         nome: data.nome,
@@ -47,11 +60,15 @@ class OrcamentoService {
         client
       );
 
+      // ================= CLIENTE =================
+
       const clienteData = {
         nome: data.nomeClient?.trim(),
+
         cpf_cnpj: data.cpfCnpjClient
           ? String(data.cpfCnpjClient).replace(/\D/g, '')
           : null,
+
         endereco: data.enderecoClient?.trim() ?? null,
         telefone: data.telefoneClient?.trim() ?? null,
         email: data.emailClient?.trim() ?? null
@@ -73,7 +90,11 @@ class OrcamentoService {
 
       console.log('Cliente ID final:', clienteId);
 
+      // ================= TOKEN PÚBLICO =================
+
       const tokenPublico = crypto.randomBytes(32).toString('hex');
+
+      // ================= DADOS DO ORÇAMENTO =================
 
       const orcamentoData = {
         formaPagamento: data.formaPagamento ?? null,
@@ -96,7 +117,10 @@ class OrcamentoService {
 
       console.log('Número do orçamento:', numeroOrcamento);
 
+      // ================= ITENS DO ORÇAMENTO =================
+
       for (const item of data.itens) {
+
         await ItemModel.create(
           numeroOrcamento,
           {
@@ -107,6 +131,7 @@ class OrcamentoService {
           },
           client
         );
+
       }
 
       await client.query('COMMIT');
@@ -119,37 +144,50 @@ class OrcamentoService {
       };
 
     } catch (error) {
+
       await client.query('ROLLBACK');
+
       console.error('Erro ao criar orçamento:', error);
+
       throw error;
 
     } finally {
+
       client.release();
+
     }
+
   }
 
   // ================= LISTAR ORÇAMENTOS =================
 
   static async getAll(usuarioId) {
+
     const client = await pool.connect();
 
     try {
+
       return await OrcamentoModel.findAllForModal(
         client,
         usuarioId
       );
 
     } finally {
+
       client.release();
+
     }
+
   }
 
   // ================= BUSCAR ORÇAMENTO POR ID =================
 
   static async getById(id) {
+
     const client = await pool.connect();
 
     try {
+
       const data = await OrcamentoModel.findCompleteById(
         id,
         client
@@ -162,16 +200,21 @@ class OrcamentoService {
       return data;
 
     } finally {
+
       client.release();
+
     }
+
   }
 
   // ================= ATUALIZAR STATUS E ESTOQUE =================
 
   static async updateStatus(numeroOrcamento, novoStatus, usuarioId) {
+
     const client = await pool.connect();
 
     try {
+
       await client.query('BEGIN');
 
       const statusPermitidos = [
@@ -184,6 +227,9 @@ class OrcamentoService {
       if (!statusPermitidos.includes(novoStatus)) {
         throw new Error('Status inválido');
       }
+
+      // Bloqueia o orçamento durante a operação.
+      // Isso evita duas aprovações simultâneas.
 
       const budgetResult = await client.query(
         `
@@ -202,24 +248,35 @@ class OrcamentoService {
 
       const statusAtual = budgetResult.rows[0].status;
 
+      // Se já estiver no mesmo status, não faz nada.
+
       if (statusAtual === novoStatus) {
+
         await client.query('COMMIT');
 
         return {
           status: statusAtual,
           message: 'O orçamento já está com esse status.'
         };
+
       }
 
+      // Não permite retirar a aprovação sem devolver o estoque.
+
       if (statusAtual === 'Aprovado' && novoStatus !== 'Aprovado') {
+
         throw new Error(
           'Não é possível alterar o status de um orçamento aprovado sem antes devolver os produtos ao estoque.'
         );
+
       }
 
       // ================= BAIXA DE ESTOQUE =================
 
       if (novoStatus === 'Aprovado') {
+
+        // Busca somente os produtos.
+        // Serviços não possuem movimentação de estoque.
 
         const produtosResult = await client.query(
           `
@@ -245,16 +302,22 @@ class OrcamentoService {
           const estoqueAtual = Number(item.estoque);
 
           if (!Number.isInteger(quantidade) || quantidade <= 0) {
+
             throw new Error(
               `Quantidade inválida para o produto ${item.nome}.`
             );
+
           }
 
           if (estoqueAtual < quantidade) {
+
             throw new Error(
               `Estoque insuficiente para o produto "${item.nome}". Disponível: ${estoqueAtual}. Necessário: ${quantidade}.`
             );
+
           }
+
+          // Retira a quantidade do estoque.
 
           const updateEstoque = await client.query(
             `
@@ -269,12 +332,15 @@ class OrcamentoService {
           );
 
           if (updateEstoque.rows.length === 0) {
+
             throw new Error(
               `Não foi possível atualizar o estoque do produto ${item.nome}.`
             );
+
           }
 
-          // Registrar saída vinculada ao usuário autenticado
+          // Registra a saída no histórico.
+
           await client.query(
             `
             INSERT INTO movimentacoes_estoque (
@@ -293,7 +359,9 @@ class OrcamentoService {
               usuarioId
             ]
           );
+
         }
+
       }
 
       // ================= ATUALIZAR STATUS =================
@@ -319,20 +387,27 @@ class OrcamentoService {
       };
 
     } catch (error) {
+
       await client.query('ROLLBACK');
+
       throw error;
 
     } finally {
+
       client.release();
+
     }
+
   }
 
   // ================= EXCLUIR ORÇAMENTO =================
 
   static async delete(numeroOrcamento, usuarioId) {
+
     const client = await pool.connect();
 
     try {
+
       await client.query('BEGIN');
 
       const budget = await client.query(
@@ -351,9 +426,11 @@ class OrcamentoService {
       }
 
       if (budget.rows[0].status === 'Aprovado') {
+
         throw new Error(
           'Não é possível excluir um orçamento aprovado sem antes devolver os produtos ao estoque.'
         );
+
       }
 
       await client.query(
@@ -376,17 +453,23 @@ class OrcamentoService {
       await client.query('COMMIT');
 
     } catch (error) {
+
       await client.query('ROLLBACK');
+
       throw error;
 
     } finally {
+
       client.release();
+
     }
+
   }
 
   // ================= GERAR PDF =================
 
   static async generatePdf(id) {
+
     const { budget, items, total } = await this.getById(id);
 
     const templatePath = path.resolve(
@@ -398,40 +481,71 @@ class OrcamentoService {
     console.log('Template existe?', fs.existsSync(templatePath));
 
     if (!fs.existsSync(templatePath)) {
-      throw new Error(`Template não encontrado: ${templatePath}`);
+      throw new Error(
+        `Template não encontrado: ${templatePath}`
+      );
     }
 
     let html = fs.readFileSync(templatePath, 'utf-8');
 
+    // ================= ITENS DO PDF =================
+
     const itemsHtml = items.map((item) => {
+
       const unit = Number(item.valor_unitario);
       const totalItem = Number(item.total_item);
 
       return `
         <tr>
-          <td>${item.produto_servico}</td>
-          <td>${item.quantidade}</td>
+          <td>${escapeHtml(item.produto_servico)}</td>
+          <td>${escapeHtml(item.quantidade)}</td>
           <td>R$ ${unit.toFixed(2)}</td>
           <td>R$ ${totalItem.toFixed(2)}</td>
         </tr>
       `;
+
     }).join('');
 
+    // ================= LOGO DO EMISSOR =================
+
+    const logoUrl = String(budget.emissor_logo || '').trim();
+
+    let logoHtml = '';
+
+    if (logoUrl) {
+
+      const logoSegura = escapeHtml(logoUrl);
+
+      logoHtml = `
+        <img
+          class="issuer-logo"
+          src="${logoSegura}"
+          alt="Logo do emissor"
+        >
+      `;
+
+    }
+
+    // ================= SUBSTITUIR DADOS NO HTML =================
+
     html = html
-      .replace('{{logo}}', budget.emissor_logo || '')
-      .replace('{{numero_orcamento}}', String(budget.numero_orcamento))
-      .replace('{{emissor_nome}}', budget.emissor_nome || '')
-      .replace('{{emissor_email}}', budget.emissor_email || '')
-      .replace('{{emissor_telefone}}', budget.emissor_telefone || '')
-      .replace('{{cliente_nome}}', budget.cliente_nome || '')
-      .replace('{{cliente_email}}', budget.cliente_email || '')
-      .replace('{{cliente_telefone}}', budget.cliente_telefone || '')
+      .replace('{{logo}}', logoHtml)
+      .replace('{{numero_orcamento}}', escapeHtml(budget.numero_orcamento))
+      .replace('{{emissor_nome}}', escapeHtml(budget.emissor_nome))
+      .replace('{{emissor_email}}', escapeHtml(budget.emissor_email))
+      .replace('{{emissor_telefone}}', escapeHtml(budget.emissor_telefone))
+      .replace('{{cliente_nome}}', escapeHtml(budget.cliente_nome))
+      .replace('{{cliente_email}}', escapeHtml(budget.cliente_email))
+      .replace('{{cliente_telefone}}', escapeHtml(budget.cliente_telefone))
       .replace('{{items}}', itemsHtml)
-      .replace('{{total}}', total.toFixed(2));
+      .replace('{{total}}', Number(total || 0).toFixed(2));
+
+    // ================= INICIAR CHROMIUM =================
 
     let browser;
 
     try {
+
       console.log('===== INICIANDO CHROMIUM NA VERCEL =====');
 
       const [chromiumModule, puppeteerModule] = await Promise.all([
@@ -455,9 +569,36 @@ class OrcamentoService {
 
       const page = await browser.newPage();
 
+      // Carrega o HTML do orçamento.
+
       await page.setContent(html, {
         waitUntil: 'networkidle0'
       });
+
+      // Aguarda o carregamento das imagens, incluindo a logo.
+
+      await page.evaluate(async () => {
+
+        await Promise.all(
+          Array.from(document.images).map((img) => {
+
+            if (img.complete) {
+              return Promise.resolve();
+            }
+
+            return new Promise((resolve) => {
+
+              img.onload = resolve;
+              img.onerror = resolve;
+
+            });
+
+          })
+        );
+
+      });
+
+      // ================= GERAR PDF =================
 
       const pdf = await page.pdf({
         format: 'A4',
@@ -467,15 +608,21 @@ class OrcamentoService {
       return pdf;
 
     } catch (error) {
+
       console.error('Erro ao gerar PDF:', error);
+
       throw error;
 
     } finally {
+
       if (browser) {
         await browser.close();
       }
+
     }
+
   }
+
 }
 
 module.exports = OrcamentoService;
