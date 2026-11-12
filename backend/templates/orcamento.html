@@ -26,9 +26,18 @@
 
     /* CABEÇALHO */
     .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
       margin-bottom: 32px;
-      padding-bottom: 12px;
+      padding-bottom: 16px;
       border-bottom: 0.5px solid #ddd;
+    }
+
+    .header-content {
+      min-width: 0;
+      flex: 1;
     }
 
     .header h1 {
@@ -43,6 +52,24 @@
       margin-top: 5px;
       font-size: 11px;
       color: #888;
+    }
+
+    .logo-container {
+      flex: 0 0 auto;
+      width: 116px;
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .issuer-logo {
+      display: block;
+      max-width: 116px;
+      max-height: 76px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
     }
 
     /* EMISSOR E CLIENTE */
@@ -70,6 +97,7 @@
       line-height: 1.8;
       color: #666;
       font-size: 11px;
+      overflow-wrap: anywhere;
     }
 
     .info strong {
@@ -179,11 +207,30 @@
       tr {
         page-break-inside: avoid;
       }
+
+      .issuer-logo {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
     }
 
     @media screen and (max-width: 600px) {
       body {
         margin: 20px;
+      }
+
+      .header {
+        gap: 14px;
+      }
+
+      .logo-container {
+        width: 88px;
+        height: 64px;
+      }
+
+      .issuer-logo {
+        max-width: 88px;
+        max-height: 64px;
       }
 
       .info-grid {
@@ -209,8 +256,16 @@
 
     <!-- CABEÇALHO -->
     <header class="header">
-      <h1>ORÇAMENTO</h1>
-      <div class="subtitle">Proposta comercial</div>
+
+      <div class="header-content">
+        <h1>ORÇAMENTO</h1>
+        <div class="subtitle">Proposta comercial</div>
+      </div>
+
+      <div class="logo-container">
+        {{emissor_logo_html}}
+      </div>
+
     </header>
 
     <!-- EMISSOR E CLIENTE -->
@@ -264,7 +319,9 @@
 
     <!-- TOTAL -->
     <section class="total-area">
+
       <div class="total-content">
+
         <div class="total-label">
           VALOR TOTAL
         </div>
@@ -272,10 +329,10 @@
         <div class="total-value">
           R$ {{total}}
         </div>
-      </div>
-    </section>
 
-   
+      </div>
+
+    </section>
 
   </main>
 
