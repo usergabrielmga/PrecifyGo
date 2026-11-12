@@ -314,22 +314,20 @@ export default function Orcamento() {
    */
 
   return (
-    <div className="max-w-3xl mx-auto px-3 md:px-0">
+    <div className="w-full max-w-3xl mx-auto px-4 sm:px-5 md:px-0 pt-6 md:pt-8 pb-20 md:pb-12">
 
       {/* =================================================
           TÍTULO
       ================================================= */}
 
-      <div className="flex flex-col items-center gap-1 md:gap-2 text-[#474646] mb-5 md:mb-10 text-center">
+      <div className="flex flex-col items-center gap-2 md:gap-2 text-[#474646] mb-7 md:mb-10 text-center">
 
-        <h1 className="font-bold text-xl md:text-2xl">
+        <h1 className="font-bold text-xl md:text-2xl leading-tight">
           Gerar Orçamento
         </h1>
 
-        <p>
-          Gerando o orçamento, será
-          disponibilizado para baixar
-          PDF ou Imprimir
+        <p className="w-full max-w-[320px] sm:max-w-md px-2 text-sm md:text-base leading-relaxed text-center break-words">
+          Gerando o orçamento, será disponibilizado para baixar PDF ou Imprimir.
         </p>
 
       </div>
