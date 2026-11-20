@@ -9,7 +9,7 @@ import PrivateLayout from '../layouts/PrivateLayout'
 import Produtos from '../views/pages/produtos'
 import Servicos from '../views/pages/servicos'
 import Veiculos from '../views/pages/veiculos'
-import Orcamento from '../views/pages/Orcamento'
+import Orcamento from '../views/pages/orcamento'
 
 export default function AppRoutes() {
   return (
