@@ -559,17 +559,36 @@ class OrcamentoService {
 
     // ================= SUBSTITUIR DADOS NO HTML =================
 
+    
     html = html
       .replace('{{logo}}', logoHtml)
       .replace('{{numero_orcamento}}', escapeHtml(budget.numero_orcamento))
+
+      // EMISSOR
       .replace('{{emissor_nome}}', escapeHtml(budget.emissor_nome))
       .replace('{{emissor_email}}', escapeHtml(budget.emissor_email))
       .replace('{{emissor_telefone}}', escapeHtml(budget.emissor_telefone))
+
+      // CLIENTE
       .replace('{{cliente_nome}}', escapeHtml(budget.cliente_nome))
       .replace('{{cliente_email}}', escapeHtml(budget.cliente_email))
       .replace('{{cliente_telefone}}', escapeHtml(budget.cliente_telefone))
+
+      // VEÍCULO
+      .replace('{{veiculo_marca}}', escapeHtml(budget.veiculo_marca))
+      .replace('{{veiculo_modelo}}', escapeHtml(budget.veiculo_modelo))
+      .replace('{{veiculo_placa}}', escapeHtml(budget.veiculo_placa))
+      .replace('{{veiculo_ano}}', escapeHtml(budget.veiculo_ano))
+      .replace('{{veiculo_cor}}', escapeHtml(budget.veiculo_cor))
+
+      // OBSERVAÇÕES
+      .replace('{{observacoes}}', escapeHtml(budget.observacoes))
+      .replace('{{veiculo_observacoes}}', escapeHtml(budget.veiculo_observacoes))
+
+      // ITENS E TOTAL
       .replace('{{items}}', itemsHtml)
       .replace('{{total}}', Number(total || 0).toFixed(2));
+
 
     // ================= INICIAR CHROMIUM =================
 

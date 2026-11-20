@@ -120,103 +120,104 @@ class OrcamentoModel {
 
   // ================= BUSCAR ORÇAMENTO COMPLETO =================
 
-  static async findCompleteById(numeroOrcamento, conn) {
-    const budgetResult = await conn.query(
-      `
-      SELECT
-        o.numero_orcamento,
-        o.forma_pagamento,
-        o.desconto,
-        o.acrescimo,
-        o.validade,
-        o.token_publico,
-        o.data_emissao,
-        o.status,
-        o.observacoes,
+  
+static async findCompleteById(numeroOrcamento, conn) {
+  const budgetResult = await conn.query(
+    `
+    SELECT
+      o.numero_orcamento,
+      o.forma_pagamento,
+      o.desconto,
+      o.acrescimo,
+      o.validade,
+      o.token_publico,
+      o.data_emissao,
+      o.status,
+      o.observacoes,
 
-        e.nome AS emissor_nome,
-        e.email AS emissor_email,
-        e.telefone AS emissor_telefone,
-        e.logotipo AS emissor_logo,
+      e.nome AS emissor_nome,
+      e.email AS emissor_email,
+      e.telefone AS emissor_telefone,
+      e.logotipo AS emissor_logo,
 
-        c.nome AS cliente_nome,
-        c.email AS cliente_email,
-        c.telefone AS cliente_telefone,
+      c.nome AS cliente_nome,
+      c.email AS cliente_email,
+      c.telefone AS cliente_telefone,
 
-        -- DADOS DO VEÍCULO
-        v.marca AS veiculo_marca,
-        v.modelo AS veiculo_modelo,
-        v.placa AS veiculo_placa,
-        v.ano AS veiculo_ano,
-        v.cor AS veiculo_cor,
-        v.observacoes AS veiculo_observacoes
+      -- DADOS DO VEÍCULO
+      v.marca AS veiculo_marca,
+      v.modelo AS veiculo_modelo,
+      v.placa AS veiculo_placa,
+      v.ano AS veiculo_ano,
+      v.cor AS veiculo_cor,
+      v.observacoes AS veiculo_observacoes
 
-      FROM dados_orcamento o
+    FROM dados_orcamento o
 
-      JOIN emissor e
-        ON e.id_emissor = o.emissor_id_emissor
+    JOIN emissor e
+      ON e.id_emissor = o.emissor_id_emissor
 
-      JOIN cliente c
-        ON c.id_cliente = o.cliente_id_cliente
+    JOIN cliente c
+      ON c.id_cliente = o.cliente_id_cliente
 
-      LEFT JOIN veiculos v
-        ON v.id_veiculo = o.veiculo_id
-       AND v.cliente_id = c.id_cliente
-       AND v.usuario_id = o.usuario_id
+    LEFT JOIN veiculos v
+      ON v.id_veiculo = o.veiculo_id
+     AND v.cliente_id = o.cliente_id_cliente
+     AND v.usuario_id = o.usuario_id
 
-      WHERE o.numero_orcamento = $1
-      `,
-      [numeroOrcamento]
-    );
+    WHERE o.numero_orcamento = $1
+    `,
+    [numeroOrcamento]
+  );
 
-    const budget = budgetResult.rows[0];
+  const budget = budgetResult.rows[0];
 
-    if (!budget) {
-      return null;
-    }
-
-    // ================= BUSCAR PRODUTOS E SERVIÇOS =================
-
-    const itemsResult = await conn.query(
-      `
-      SELECT
-        i.produto_id,
-        i.servico_id,
-        COALESCE(p.nome, s.nome) AS produto_servico,
-        i.quantidade,
-        i.valor_unitario,
-        (
-          i.quantidade * i.valor_unitario
-        ) AS total_item
-
-      FROM itens_orcamento i
-
-      LEFT JOIN produtos p
-        ON p.id_produto = i.produto_id
-
-      LEFT JOIN servicos s
-        ON s.id_servico = i.servico_id
-
-      WHERE i.dados_orcamento_numero_orcamento = $1
-
-      ORDER BY i.iditens_orcamento
-      `,
-      [numeroOrcamento]
-    );
-
-    const items = itemsResult.rows;
-
-    const total = items.reduce(
-      (sum, item) => sum + Number(item.total_item),
-      0
-    );
-
-    return {
-      budget,
-      items,
-      total
-    };
+  if (!budget) {
+    return null;
   }
+
+  // BUSCAR PRODUTOS E SERVIÇOS
+  const itemsResult = await conn.query(
+    `
+    SELECT
+      i.produto_id,
+      i.servico_id,
+      COALESCE(p.nome, s.nome) AS produto_servico,
+      i.quantidade,
+      i.valor_unitario,
+      (
+        i.quantidade * i.valor_unitario
+      ) AS total_item
+
+    FROM itens_orcamento i
+
+    LEFT JOIN produtos p
+      ON p.id_produto = i.produto_id
+
+    LEFT JOIN servicos s
+      ON s.id_servico = i.servico_id
+
+    WHERE i.dados_orcamento_numero_orcamento = $1
+
+    ORDER BY i.iditens_orcamento
+    `,
+    [numeroOrcamento]
+  );
+
+  const items = itemsResult.rows;
+
+  const total = items.reduce(
+    (sum, item) => sum + Number(item.total_item),
+    0
+  );
+
+  return {
+    budget,
+    items,
+    total
+  };
+}
+
 }
 
 module.exports = OrcamentoModel;
