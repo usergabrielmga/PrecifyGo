@@ -1,56 +1,55 @@
+
 class OrcamentoModel {
   // ================= CRIAR ORÇAMENTO =================
 
- 
-static async create(data, conn, usuarioId) {
-  const normalize = (value) =>
-    value === undefined || value === '' ? null : value;
+  static async create(data, conn, usuarioId) {
+    const normalize = (value) =>
+      value === undefined || value === '' ? null : value;
 
-  const result = await conn.query(
-    `
-    INSERT INTO dados_orcamento (
-      forma_pagamento,
-      motivo_desconto,
-      desconto,
-      motivo_acrescimo,
-      acrescimo,
-      validade,
-      data_emissao,
-      status,
-      observacoes,
-      token_publico,
-      emissor_id_emissor,
-      cliente_id_cliente,
-      usuario_id,
-      veiculo_id
-    )
-    VALUES (
-      $1, $2, $3, $4, $5, $6,
-      CURRENT_DATE,
-      'Pendente',
-      $7, $8, $9, $10, $11, $12
-    )
-    RETURNING numero_orcamento
-    `,
-    [
-      normalize(data.formaPagamento),
-      normalize(data.motivoDesconto),
-      Number(data.desconto) || 0,
-      normalize(data.motivoAcrescimo),
-      Number(data.acrescimo) || 0,
-      normalize(data.dataValidade),
-      normalize(data.observacoes),
-      data.tokenPublico,
-      data.Emissor_Id_emissor,
-      data.Cliente_Id_cliente,
-      usuarioId,
-      normalize(data.veiculoId)
-    ]
-  );
+    const result = await conn.query(
+      `
+      INSERT INTO dados_orcamento (
+        forma_pagamento,
+        motivo_desconto,
+        desconto,
+        motivo_acrescimo,
+        acrescimo,
+        validade,
+        data_emissao,
+        status,
+        observacoes,
+        token_publico,
+        emissor_id_emissor,
+        cliente_id_cliente,
+        usuario_id,
+        veiculo_id
+      )
+      VALUES (
+        $1, $2, $3, $4, $5, $6,
+        CURRENT_DATE,
+        'Pendente',
+        $7, $8, $9, $10, $11, $12
+      )
+      RETURNING numero_orcamento
+      `,
+      [
+        normalize(data.formaPagamento),
+        normalize(data.motivoDesconto),
+        Number(data.desconto) || 0,
+        normalize(data.motivoAcrescimo),
+        Number(data.acrescimo) || 0,
+        normalize(data.dataValidade),
+        normalize(data.observacoes),
+        data.tokenPublico,
+        data.Emissor_Id_emissor,
+        data.Cliente_Id_cliente,
+        usuarioId,
+        normalize(data.veiculoId)
+      ]
+    );
 
-  return result.rows[0].numero_orcamento;
-}
-
+    return result.rows[0].numero_orcamento;
+  }
 
   // ================= BUSCAR ITENS POR ORÇAMENTO =================
 
@@ -76,9 +75,9 @@ static async create(data, conn, usuarioId) {
       ORDER BY i.iditens_orcamento
       `,
       [numeroOrcamento]
-    )
+    );
 
-    return result.rows
+    return result.rows;
   }
 
   // ================= LISTAR ORÇAMENTOS DO USUÁRIO =================
@@ -114,9 +113,9 @@ static async create(data, conn, usuarioId) {
       ORDER BY o.numero_orcamento DESC
       `,
       [usuarioId]
-    )
+    );
 
-    return result.rows
+    return result.rows;
   }
 
   // ================= BUSCAR ORÇAMENTO COMPLETO =================
@@ -142,7 +141,15 @@ static async create(data, conn, usuarioId) {
 
         c.nome AS cliente_nome,
         c.email AS cliente_email,
-        c.telefone AS cliente_telefone
+        c.telefone AS cliente_telefone,
+
+        -- DADOS DO VEÍCULO
+        v.marca AS veiculo_marca,
+        v.modelo AS veiculo_modelo,
+        v.placa AS veiculo_placa,
+        v.ano AS veiculo_ano,
+        v.cor AS veiculo_cor,
+        v.observacoes AS veiculo_observacoes
 
       FROM dados_orcamento o
 
@@ -152,18 +159,24 @@ static async create(data, conn, usuarioId) {
       JOIN cliente c
         ON c.id_cliente = o.cliente_id_cliente
 
+      LEFT JOIN veiculos v
+        ON v.id_veiculo = o.veiculo_id
+       AND v.cliente_id = c.id_cliente
+       AND v.usuario_id = o.usuario_id
+
       WHERE o.numero_orcamento = $1
       `,
       [numeroOrcamento]
-    )
+    );
 
-    const budget = budgetResult.rows[0]
+    const budget = budgetResult.rows[0];
 
     if (!budget) {
-      return null
+      return null;
     }
 
-    // Buscar produtos e serviços associados ao orçamento.
+    // ================= BUSCAR PRODUTOS E SERVIÇOS =================
+
     const itemsResult = await conn.query(
       `
       SELECT
@@ -189,21 +202,21 @@ static async create(data, conn, usuarioId) {
       ORDER BY i.iditens_orcamento
       `,
       [numeroOrcamento]
-    )
+    );
 
-    const items = itemsResult.rows
+    const items = itemsResult.rows;
 
     const total = items.reduce(
       (sum, item) => sum + Number(item.total_item),
       0
-    )
+    );
 
     return {
       budget,
       items,
-      total,
-    }
+      total
+    };
   }
 }
 
-module.exports = OrcamentoModel
+module.exports = OrcamentoModel;
