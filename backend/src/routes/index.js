@@ -20,6 +20,10 @@ fastify.decorate("authenticate", async function (request, reply) {
     prefix: '/clientes'
   })
 
+  fastify.register(require('./veiculos.routes'), {
+  prefix: '/veiculos'
+})
+
   fastify.register(require('./dashboard.routes'))
 
   fastify.register(require('./orcamentoPublico.routes'))

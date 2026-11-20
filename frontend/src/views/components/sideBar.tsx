@@ -4,7 +4,7 @@ import LogoutButton from "../../models/logoutModal";
 import Profile from "../../imgs/profile.png";
 import logo from "../../imgs/logo.png";
 
-import { LayoutDashboard, FileText, Users, Package, Wrench } from "lucide-react";
+import { LayoutDashboard, FileText, Users, Package, Wrench, CarFront } from "lucide-react";
 
 export default function SideBar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -146,6 +146,21 @@ export default function SideBar() {
         >
           <Wrench className="h-6 w-6" />
           <p className="font-medium">Serviços</p>
+        </NavLink>
+
+                <NavLink
+          to="/veiculos"
+          onClick={() => setSidebarOpen(false)}
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+              isActive
+                ? "bg-[#EA2E52] text-white"
+                : "text-gray-700 hover:bg-gray-100"
+            }`
+          }
+        >
+          <CarFront className="w-6 h-6" />
+          <p className="font-medium">Veículos</p>
         </NavLink>
 
         </nav>

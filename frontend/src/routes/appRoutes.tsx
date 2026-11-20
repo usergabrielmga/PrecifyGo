@@ -9,6 +9,7 @@ import OrcamentoPublico from '../views/pages/OrcamentoPublico'
 import PrivateLayout from '../layouts/PrivateLayout'
 import Produtos from '../views/pages/produtos'
 import Servicos from '../views/pages/servicos'
+import Veiculos from '../views/pages/veiculos'
 
 export default function AppRoutes() {
   return (
@@ -98,6 +99,18 @@ export default function AppRoutes() {
     <PrivateRoute>
       <PrivateLayout>
         <Servicos />
+      </PrivateLayout>
+    </PrivateRoute>
+  }
+/>
+
+
+  <Route
+  path="/veiculos"
+  element={
+    <PrivateRoute>
+      <PrivateLayout>
+        <Veiculos />
       </PrivateLayout>
     </PrivateRoute>
   }
