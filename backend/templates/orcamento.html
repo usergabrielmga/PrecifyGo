@@ -2,405 +2,361 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Orçamento - Oficina</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orçamento</title>
 
-<style>
-* {
-    box-sizing: border-box;
-}
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 11px;
-    color: #222;
-    margin: 30px;
-    background: #fff;
-}
-
-.document {
-    max-width: 850px;
-    margin: auto;
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px solid #333;
-    padding-bottom: 12px;
-    margin-bottom: 18px;
-}
-
-.header h1 {
-    font-size: 21px;
-    margin: 0;
-    text-transform: uppercase;
-}
-
-.subtitle {
-    font-size: 11px;
-    color: #777;
-    margin-top: 5px;
-}
-
-.logo-container {
-    width: 110px;
-    height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
-
-.issuer-logo {
-    max-width: 110px;
-    max-height: 70px;
-    object-fit: contain;
-}
-
-.date {
-    text-align: right;
-    margin-bottom: 12px;
-    font-size: 10px;
-}
-
-.section {
-    margin-bottom: 15px;
-}
-
-.section-title {
-    background: #eaeaea;
-    border: 1px solid #ccc;
-    padding: 7px 9px;
-    font-weight: bold;
-    text-transform: uppercase;
-    font-size: 10px;
-    letter-spacing: .4px;
-}
-
-.info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    border: 1px solid #ccc;
-    border-top: none;
-}
-
-.info-item {
-    padding: 8px;
-    border-right: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
-    min-height: 36px;
-    overflow-wrap: anywhere;
-}
-
-.info-item strong {
-    display: block;
-    color: #777;
-    font-size: 9px;
-    margin-bottom: 4px;
-    text-transform: uppercase;
-}
-
-.vehicle-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    border: 1px solid #ccc;
-    border-top: none;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-thead th {
-    background: #f0f0f0;
-    border: 1px solid #ccc;
-    padding: 9px 7px;
-    text-transform: uppercase;
-    font-size: 9px;
-    text-align: left;
-}
-
-tbody td {
-    border: 1px solid #ddd;
-    padding: 10px 7px;
-    font-size: 10px;
-}
-
-.center {
-    text-align: center;
-}
-
-.right {
-    text-align: right;
-}
-
-.labor {
-    border: 1px solid #ccc;
-    padding: 12px;
-    min-height: 45px;
-}
-
-.labor-title {
-    font-weight: bold;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-}
-
-.total-area {
-    margin-top: 15px;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.total-table {
-    width: 65%;
-}
-
-.total-table td {
-    padding: 10px;
-    border: 1px solid #ccc;
-}
-
-.total-label {
-    font-weight: bold;
-}
-
-.total-value {
-    text-align: right;
-    font-weight: bold;
-    font-size: 13px;
-}
-
-.receivable {
-    background: #ffeb00;
-    font-weight: bold;
-    font-size: 15px;
-    text-align: center;
-}
-
-.signature {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-top: 30px;
-}
-
-.signature div {
-    border-top: 1px solid #888;
-    padding-top: 7px;
-    text-align: center;
-    font-size: 10px;
-}
-
-.footer {
-    text-align: center;
-    margin-top: 35px;
-    padding-top: 10px;
-    border-top: 1px solid #ddd;
-    color: #888;
-    font-size: 9px;
-}
-
-@media print {
     body {
-        margin: 20px;
+      margin: 0;
+      padding: 30px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      color: #252525;
+      background: #fff;
     }
 
     .document {
-        max-width: 100%;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
     }
 
-    thead {
-        display: table-header-group;
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding-bottom: 18px;
+      border-bottom: 2px solid #252525;
     }
 
-    tr {
-        page-break-inside: avoid;
+    .header h1 {
+      margin: 0;
+      font-size: 25px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
     }
 
-    .section-title,
-    .receivable,
-    thead th {
-        print-color-adjust: exact;
-        -webkit-print-color-adjust: exact;
-    }
-}
-
-@media screen and (max-width: 600px) {
-    body {
-        margin: 12px;
+    .header-subtitle {
+      margin-top: 5px;
+      color: #777;
+      font-size: 11px;
     }
 
-    .info-grid,
-    .signature {
-        grid-template-columns: 1fr;
+    .logo-container {
+      width: 125px;
+      height: 75px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .issuer-logo {
+      max-width: 125px;
+      max-height: 75px;
+      object-fit: contain;
+    }
+
+    .budget-number {
+      margin: 18px 0;
+      padding: 11px 14px;
+      background: #f1f1f1;
+      border-left: 4px solid #333;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .section {
+      margin-top: 20px;
+    }
+
+    .section-title {
+      padding: 8px 10px;
+      margin-bottom: 10px;
+      background: #333;
+      color: #fff;
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 25px;
+      padding: 4px 5px 10px;
+    }
+
+    .info-item {
+      min-height: 30px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .info-label {
+      display: block;
+      color: #777;
+      font-size: 10px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .info-value {
+      font-size: 12px;
+      font-weight: bold;
+      color: #252525;
     }
 
     .vehicle-grid {
-        grid-template-columns: 1fr 1fr;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px 18px;
+      padding: 5px;
     }
 
-    .total-table {
-        width: 100%;
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 5px;
     }
-}
-</style>
+
+    .items-table thead th {
+      padding: 11px 8px;
+      background: #ededed;
+      border: 1px solid #d5d5d5;
+      font-size: 10px;
+      text-transform: uppercase;
+      text-align: left;
+    }
+
+    .items-table tbody td {
+      padding: 11px 8px;
+      border: 1px solid #dedede;
+      font-size: 11px;
+    }
+
+    .items-table th:nth-child(2),
+    .items-table td:nth-child(2) {
+      text-align: center;
+      width: 65px;
+    }
+
+    .items-table th:nth-child(3),
+    .items-table td:nth-child(3),
+    .items-table th:nth-child(4),
+    .items-table td:nth-child(4) {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .totals {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 18px;
+    }
+
+    .total-box {
+      width: 270px;
+      border: 1px solid #ccc;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px;
+      background: #333;
+      color: #fff;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .observations {
+      min-height: 55px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .footer {
+      margin-top: 45px;
+      padding-top: 12px;
+      border-top: 1px solid #ccc;
+      text-align: center;
+      color: #777;
+      font-size: 10px;
+    }
+
+    @media print {
+      body {
+        padding: 20px;
+      }
+
+      .section,
+      .budget-number,
+      .totals,
+      .items-table tr {
+        page-break-inside: avoid;
+      }
+
+      .section-title,
+      .total-row,
+      .items-table thead th {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+    }
+  </style>
 </head>
 
 <body>
-
-<main class="document">
+  <main class="document">
 
     <!-- CABEÇALHO -->
     <header class="header">
-        <div>
-            <h1>{{emissor_nome}}</h1>
-            <div class="subtitle">ORÇAMENTO DE SERVIÇOS AUTOMOTIVOS</div>
+      <div>
+        <h1>Orçamento</h1>
+        <div class="header-subtitle">
+          Proposta de produtos e serviços automotivos
         </div>
+      </div>
 
-        <div class="logo-container">
-            {{logo}}
-        </div>
+      <div class="logo-container">
+        {{logo}}
+      </div>
     </header>
 
-    <div class="date">
-        Data do orçamento: {{data_orcamento}}
+    <!-- NÚMERO -->
+    <div class="budget-number">
+      ORÇAMENTO Nº {{numero_orcamento}}
     </div>
 
-    <!-- CLIENTE -->
+    <!-- DADOS DO EMISSOR -->
     <section class="section">
-        <div class="section-title">Dados do Cliente</div>
+      <div class="section-title">Dados da oficina / emissor</div>
 
-        <div class="info-grid">
-            <div class="info-item">
-                <strong>Cliente</strong>
-                {{cliente_nome}}
-            </div>
-
-            <div class="info-item">
-                <strong>Telefone</strong>
-                {{cliente_telefone}}
-            </div>
-
-            <div class="info-item">
-                <strong>E-mail</strong>
-                {{cliente_email}}
-            </div>
-
-            <div class="info-item">
-                <strong>Endereço</strong>
-                {{cliente_endereco}}
-            </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Nome</span>
+          <span class="info-value">{{emissor_nome}}</span>
         </div>
+
+        <div class="info-item">
+          <span class="info-label">Telefone</span>
+          <span class="info-value">{{emissor_telefone}}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">E-mail</span>
+          <span class="info-value">{{emissor_email}}</span>
+        </div>
+      </div>
     </section>
 
-    <!-- VEÍCULO -->
+    <!-- DADOS DO CLIENTE -->
     <section class="section">
-        <div class="section-title">Dados do Veículo</div>
+      <div class="section-title">Dados do cliente</div>
 
-        <div class="vehicle-grid">
-            <div class="info-item">
-                <strong>Marca</strong>
-                {{veiculo_marca}}
-            </div>
-
-            <div class="info-item">
-                <strong>Modelo</strong>
-                {{veiculo_modelo}}
-            </div>
-
-            <div class="info-item">
-                <strong>Cor</strong>
-                {{veiculo_cor}}
-            </div>
-
-            <div class="info-item">
-                <strong>Placa</strong>
-                {{veiculo_placa}}
-            </div>
-
-            <div class="info-item">
-                <strong>Ano</strong>
-                {{veiculo_ano}}
-            </div>
-
-            <div class="info-item">
-                <strong>Quilometragem</strong>
-                {{veiculo_km}}
-            </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Cliente</span>
+          <span class="info-value">{{cliente_nome}}</span>
         </div>
+
+        <div class="info-item">
+          <span class="info-label">Telefone</span>
+          <span class="info-value">{{cliente_telefone}}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">E-mail</span>
+          <span class="info-value">{{cliente_email}}</span>
+        </div>
+      </div>
     </section>
 
-    <!-- SERVIÇOS E PRODUTOS -->
+    <!-- DADOS DO VEÍCULO -->
     <section class="section">
-        <div class="section-title">Peças e Serviços</div>
+      <div class="section-title">Dados do veículo</div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th class="center" width="10%">Qtd.</th>
-                    <th width="55%">Descrição</th>
-                    <th class="right" width="17%">Valor Unit.</th>
-                    <th class="right" width="18%">Subtotal</th>
-                </tr>
-            </thead>
+      <div class="vehicle-grid">
+        <div class="info-item">
+          <span class="info-label">Marca</span>
+          <span class="info-value">{{veiculo_marca}}</span>
+        </div>
 
-            <tbody>
-                {{items}}
-            </tbody>
-        </table>
+        <div class="info-item">
+          <span class="info-label">Modelo</span>
+          <span class="info-value">{{veiculo_modelo}}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Placa</span>
+          <span class="info-value">{{veiculo_placa}}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Ano</span>
+          <span class="info-value">{{veiculo_ano}}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Cor</span>
+          <span class="info-value">{{veiculo_cor}}</span>
+        </div>
+      </div>
     </section>
 
-    <!-- MÃO DE OBRA -->
+    <!-- PRODUTOS E SERVIÇOS -->
     <section class="section">
-        <div class="section-title">Mão de Obra</div>
+      <div class="section-title">Produtos e serviços</div>
 
-        <div class="labor">
-            <div class="labor-title">Descrição</div>
-            {{mao_de_obra}}
-        </div>
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Descrição</th>
+            <th>Qtd.</th>
+            <th>Valor unitário</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {{items}}
+        </tbody>
+      </table>
     </section>
 
-    <!-- TOTAIS -->
-    <section class="total-area">
-        <table class="total-table">
-            <tr>
-                <td class="total-label">Valor total</td>
-                <td class="total-value">R$ {{total}}</td>
-            </tr>
-
-            <tr>
-                <td class="total-label">Sinal / Entrada</td>
-                <td class="total-value">R$ {{sinal}}</td>
-            </tr>
-
-            <tr>
-                <td colspan="2" class="receivable">
-                    A RECEBER: R$ {{a_receber}}
-                </td>
-            </tr>
-        </table>
+    <!-- TOTAL -->
+    <section class="totals">
+      <div class="total-box">
+        <div class="total-row">
+          <span>VALOR TOTAL</span>
+          <span>R$ {{total}}</span>
+        </div>
+      </div>
     </section>
 
-    <!-- RESPONSÁVEL -->
-    <section class="signature">
-        <div>
-            Resp. Técnico: {{responsavel_tecnico}}
-        </div>
+    <!-- OBSERVAÇÕES -->
+    <section class="section">
+      <div class="section-title">Observações</div>
 
-        <div>
-            Autorização: {{autorizacao}}
-        </div>
+      <div class="observations">
+        {{observacoes}}
+      </div>
     </section>
 
     <footer class="footer">
-        {{emissor_nome}} — Orçamento de Serviços Automotivos
+      Documento gerado pelo sistema PrecifyGo.
     </footer>
 
-</main>
-
+  </main>
 </body>
 </html>
