@@ -90,6 +90,36 @@ class OrcamentoService {
 
       console.log('Cliente ID final:', clienteId);
 
+      // ================= VALIDAR VEÍCULO =================
+
+      let veiculoId = null;
+
+      if (data.veiculoId !== undefined && data.veiculoId !== null) {
+
+        veiculoId = Number(data.veiculoId);
+
+        if (!Number.isInteger(veiculoId) || veiculoId <= 0) {
+          throw new Error('Veículo inválido');
+        }
+
+        const veiculoResult = await client.query(
+          `
+          SELECT id_veiculo
+          FROM veiculos
+          WHERE id_veiculo = $1
+            AND cliente_id = $2
+            AND usuario_id = $3
+          `,
+          [veiculoId, clienteId, usuarioId]
+        );
+
+        if (veiculoResult.rows.length === 0) {
+          throw new Error(
+            'O veículo não pertence ao cliente selecionado.'
+          );
+        }
+      }
+
       // ================= TOKEN PÚBLICO =================
 
       const tokenPublico = crypto.randomBytes(32).toString('hex');
@@ -106,6 +136,7 @@ class OrcamentoService {
         observacoes: data.observacoes ?? null,
         Emissor_Id_emissor: emissorId,
         Cliente_Id_cliente: clienteId,
+        veiculoId,
         tokenPublico
       };
 

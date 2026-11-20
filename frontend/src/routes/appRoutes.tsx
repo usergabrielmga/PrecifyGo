@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Dashboard from '../views/pages/dashboard'
 import PrivateRoute from './PrivateRoute'
 import Login from '../views/pages/login'
-import Orcamento from '../views/pages/orcamento'
 import ViewOrcamento from '../views/pages/viewOrcamento'
 import Clientes from '../views/pages/clientes'
 import OrcamentoPublico from '../views/pages/OrcamentoPublico'
@@ -10,6 +9,7 @@ import PrivateLayout from '../layouts/PrivateLayout'
 import Produtos from '../views/pages/produtos'
 import Servicos from '../views/pages/servicos'
 import Veiculos from '../views/pages/veiculos'
+import Orcamento from '../views/pages/Orcamento'
 
 export default function AppRoutes() {
   return (

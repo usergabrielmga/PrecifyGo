@@ -1,54 +1,56 @@
 class OrcamentoModel {
   // ================= CRIAR ORÇAMENTO =================
 
-  static async create(data, conn, usuarioId) {
-    const normalize = (value) =>
-      value === undefined || value === '' ? null : value
+ 
+static async create(data, conn, usuarioId) {
+  const normalize = (value) =>
+    value === undefined || value === '' ? null : value;
 
-    const result = await conn.query(
-      `
-      INSERT INTO dados_orcamento (
-        forma_pagamento,
-        motivo_desconto,
-        desconto,
-        motivo_acrescimo,
-        acrescimo,
-        validade,
-        data_emissao,
-        status,
-        observacoes,
-        token_publico,
-        emissor_id_emissor,
-        cliente_id_cliente,
-        usuario_id
-      )
-      VALUES (
-        $1, $2, $3, $4, $5, $6,
-        CURRENT_DATE,
-        'Pendente',
-        $7, $8, $9, $10, $11
-      )
-      RETURNING numero_orcamento
-      `,
-      [
-        normalize(data.formaPagamento),
-        normalize(data.motivoDesconto),
-        Number(data.desconto) || 0,
-        normalize(data.motivoAcrescimo),
-        Number(data.acrescimo) || 0,
-        normalize(data.dataValidade),
-        normalize(data.observacoes),
-        data.tokenPublico,
-        data.Emissor_Id_emissor,
-        data.Cliente_Id_cliente,
-        usuarioId,
-      ]
+  const result = await conn.query(
+    `
+    INSERT INTO dados_orcamento (
+      forma_pagamento,
+      motivo_desconto,
+      desconto,
+      motivo_acrescimo,
+      acrescimo,
+      validade,
+      data_emissao,
+      status,
+      observacoes,
+      token_publico,
+      emissor_id_emissor,
+      cliente_id_cliente,
+      usuario_id,
+      veiculo_id
     )
+    VALUES (
+      $1, $2, $3, $4, $5, $6,
+      CURRENT_DATE,
+      'Pendente',
+      $7, $8, $9, $10, $11, $12
+    )
+    RETURNING numero_orcamento
+    `,
+    [
+      normalize(data.formaPagamento),
+      normalize(data.motivoDesconto),
+      Number(data.desconto) || 0,
+      normalize(data.motivoAcrescimo),
+      Number(data.acrescimo) || 0,
+      normalize(data.dataValidade),
+      normalize(data.observacoes),
+      data.tokenPublico,
+      data.Emissor_Id_emissor,
+      data.Cliente_Id_cliente,
+      usuarioId,
+      normalize(data.veiculoId)
+    ]
+  );
 
-    console.log('Orçamento criado:', result.rows[0])
+  return result.rows[0].numero_orcamento;
+}
 
-    return result.rows[0].numero_orcamento
-  }
 
   // ================= BUSCAR ITENS POR ORÇAMENTO =================
 

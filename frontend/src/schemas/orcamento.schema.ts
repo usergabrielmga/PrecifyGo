@@ -16,6 +16,7 @@ export const orcamentoSchema = z.object({
   enderecoClient: z.string().min(1, "Endereço é obrigatório"),
   telefoneClient: z.string().min(8, "Telefone inválido"),
   emailClient: z.string().email("Email inválido"),
+  veiculoId: z.number().nullable().optional(),
 
   /* ================= Itens ================= */
   itens: z.array(

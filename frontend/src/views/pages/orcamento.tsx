@@ -16,6 +16,8 @@ import ProdutoModal from "../../models/ProdutoModal";
 import ServicoModal from "../../models/ServicoModal";
 import ClienteSelectedModal, { type Cliente } from "../../models/ClienteSelectedModal";
 import { getClientes } from "../../services/clienteService";
+import { getVeiculos } from "../../services/veiculoService";
+import type { Veiculo } from "../../types/veiculo";
 
 
 
@@ -60,6 +62,15 @@ export default function Orcamento() {
 
   const [clientes, setClientes] =
     useState<Cliente[]>([]);
+
+  const [veiculos, setVeiculos] =
+    useState<Veiculo[]>([]);
+
+  const [veiculoSelecionado, setVeiculoSelecionado] =
+    useState<number | null>(null);
+
+  const [carregandoVeiculos, setCarregandoVeiculos] =
+    useState(false);
 
   const [produtoModal, setProdutoModal] =
     useState(false);
@@ -188,13 +199,29 @@ export default function Orcamento() {
     setClienteModal(true);
   };
 
-  const selecionarCliente = (cliente: Cliente) => {
+  const selecionarCliente = async (cliente: Cliente) => {
     setValue("nomeClient", cliente.nome, { shouldValidate: true });
     setValue("cpfCnpjClient", cliente.cpf_cnpj, { shouldValidate: true });
     setValue("enderecoClient", cliente.endereco, { shouldValidate: true });
     setValue("telefoneClient", cliente.telefone, { shouldValidate: true });
     setValue("emailClient", cliente.email, { shouldValidate: true });
+
+    // Ao trocar o cliente, limpa o veículo selecionado anteriormente.
+    setVeiculoSelecionado(null);
+    setValue("veiculoId", null, { shouldValidate: true });
+    setVeiculos([]);
     setClienteModal(false);
+    setCarregandoVeiculos(true);
+
+    try {
+      const veiculosDoCliente = await getVeiculos(cliente.id);
+      setVeiculos(veiculosDoCliente);
+    } catch (error) {
+      console.error("Erro ao carregar veículos do cliente:", error);
+      showNotification("Não foi possível carregar os veículos deste cliente");
+    } finally {
+      setCarregandoVeiculos(false);
+    }
   };
 
   /*
@@ -288,6 +315,7 @@ export default function Orcamento() {
       const response =
         await createOrcamento({
           ...data,
+          veiculoId: veiculoSelecionado,
           logo: logoUrl,
         });
 
@@ -574,6 +602,52 @@ export default function Orcamento() {
 
           </div>
 
+        </section>
+
+        {/* =================================================
+            DADOS DO VEÍCULO
+        ================================================= */}
+
+        <section className="border border-[#918E8E] p-3 md:p-4 rounded-lg">
+          <h2 className="font-semibold text-sm md:text-base mb-2">
+            Dados do Veículo <span className="font-normal text-gray-500">(opcional)</span>
+          </h2>
+
+          <p className="text-xs md:text-sm text-gray-500 mb-3">
+            Selecione o veículo pertencente ao cliente escolhido.
+          </p>
+
+          <select
+            value={veiculoSelecionado ?? ""}
+            onChange={(e) => {
+              const id = e.target.value ? Number(e.target.value) : null;
+              setVeiculoSelecionado(id);
+              setValue("veiculoId", id, { shouldValidate: true });
+            }}
+            disabled={carregandoVeiculos || veiculos.length === 0}
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm md:text-base focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:text-gray-500"
+          >
+            <option value="">
+              {carregandoVeiculos
+                ? "Carregando veículos..."
+                : veiculos.length > 0
+                  ? "Nenhum veículo selecionado"
+                  : "Selecione um cliente com veículo cadastrado"}
+            </option>
+
+            {veiculos.map((veiculo) => (
+              <option key={veiculo.id_veiculo} value={veiculo.id_veiculo}>
+                {veiculo.marca} {veiculo.modelo} — {veiculo.placa}
+                {veiculo.ano ? ` (${veiculo.ano})` : ""}
+              </option>
+            ))}
+          </select>
+
+          {veiculos.length === 0 && !carregandoVeiculos && (
+            <p className="text-xs text-gray-500 mt-2">
+              Nenhum veículo disponível para este cliente. O orçamento pode ser gerado normalmente sem veículo.
+            </p>
+          )}
         </section>
 
         {/* =================================================
