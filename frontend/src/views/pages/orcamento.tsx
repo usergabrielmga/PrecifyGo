@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import {
   useForm,
   useFieldArray,
@@ -16,8 +16,9 @@ import ProdutoModal from "../../models/ProdutoModal";
 import ServicoModal from "../../models/ServicoModal";
 import ClienteSelectedModal, { type Cliente } from "../../models/ClienteSelectedModal";
 import { getClientes } from "../../services/clienteService";
-import { getVeiculos } from "../../services/veiculoService";
+
 import type { Veiculo } from "../../types/veiculo";
+import { getVeiculos } from "../../services/veiculoService";
 
 
 
@@ -71,6 +72,9 @@ export default function Orcamento() {
 
   const [carregandoVeiculos, setCarregandoVeiculos] =
     useState(false);
+
+  // Identifica a última busca para impedir que respostas antigas sobrescrevam a atual.
+  const requisicaoVeiculosAtual = useRef(0);
 
   const [produtoModal, setProdutoModal] =
     useState(false);
@@ -206,21 +210,38 @@ export default function Orcamento() {
     setValue("telefoneClient", cliente.telefone, { shouldValidate: true });
     setValue("emailClient", cliente.email, { shouldValidate: true });
 
-    // Ao trocar o cliente, limpa o veículo selecionado anteriormente.
+    // Invalida qualquer busca anterior e limpa o veículo do cliente anterior.
+    const requisicaoId = ++requisicaoVeiculosAtual.current;
     setVeiculoSelecionado(null);
     setValue("veiculoId", null, { shouldValidate: true });
     setVeiculos([]);
     setClienteModal(false);
     setCarregandoVeiculos(true);
 
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 15000);
+
     try {
-      const veiculosDoCliente = await getVeiculos(cliente.id);
-      setVeiculos(veiculosDoCliente);
+      const veiculosDoCliente = await getVeiculos(cliente.id, controller.signal);
+
+      // Só atualiza a tela se esta ainda for a busca do cliente selecionado.
+      if (requisicaoId === requisicaoVeiculosAtual.current) {
+        setVeiculos(Array.isArray(veiculosDoCliente) ? veiculosDoCliente : []);
+      }
     } catch (error) {
-      console.error("Erro ao carregar veículos do cliente:", error);
-      showNotification("Não foi possível carregar os veículos deste cliente");
+      if (requisicaoId === requisicaoVeiculosAtual.current) {
+        console.error("Erro ao carregar veículos do cliente:", error);
+        showNotification(
+          controller.signal.aborted
+            ? "A consulta de veículos demorou demais. Tente selecionar o cliente novamente."
+            : "Não foi possível carregar os veículos deste cliente"
+        );
+      }
     } finally {
-      setCarregandoVeiculos(false);
+      window.clearTimeout(timeoutId);
+      if (requisicaoId === requisicaoVeiculosAtual.current) {
+        setCarregandoVeiculos(false);
+      }
     }
   };
 

@@ -22,11 +22,15 @@ async function tratarResposta(response: Response) {
   return response.json();
 }
 
-export async function getVeiculos(clienteId?: number): Promise<Veiculo[]> {
+export async function getVeiculos(
+  clienteId?: number,
+  signal?: AbortSignal
+): Promise<Veiculo[]> {
   const params = clienteId ? `?clienteId=${clienteId}` : "";
 
   const response = await fetch(`${backend}/veiculos${params}`, {
     headers: getAuthHeaders(),
+    signal,
   });
 
   return tratarResposta(response);
